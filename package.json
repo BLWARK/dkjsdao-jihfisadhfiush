@@ -1,0 +1,46 @@
+{
+  "name": "airdrop-xyzmer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.108.1",
+    "@react-three/fiber": "^8.16.8",
+    "@tanstack/react-query": "^5.45.1",
+    "@types/next-auth": "^3.15.0",
+    "@web3modal/wagmi": "^5.0.3",
+    "axios": "^1.7.2",
+    "ethers": "^6.13.1",
+    "express-session": "^1.18.0",
+    "framer-motion": "^11.2.12",
+    "hamburger-react": "^2.5.1",
+    "next": "14.2.4",
+    "next-auth": "^4.24.7",
+    "passport": "^0.7.0",
+    "passport-twitter": "^1.0.4",
+    "react": "^18",
+    "react-countup": "^6.5.3",
+    "react-dom": "^18",
+    "react-icons": "^5.2.1",
+    "react-swipeable": "^7.0.1",
+    "three": "^0.166.1",
+    "viem": "^2.16.1",
+    "wagmi": "^2.10.5",
+    "web3modal": "^1.9.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.4",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5"
+  }
+}
