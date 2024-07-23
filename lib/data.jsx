@@ -21,6 +21,8 @@ export const dataUser = {
     },
     
   ],
+
+
   // Data kepemilikan NFT
   nfts: [
     {
@@ -41,7 +43,18 @@ export const dataUser = {
     {
       id: "2",
       name: "Empress Valor",
-      rarity: "R",
+      description: "",
+      tokenId: "",
+      image: "/empressvalor.png",
+      traits: [
+        {
+          reward: 1068.80,
+        },
+        { 
+          rarity: "R",
+        }
+      ]
+      
     },
     // {
     //   id: "7",
@@ -163,61 +176,138 @@ export const dataNFT = [
       {
         id: "2",
         name: "Empress Valor",
-        reward: 1068.80,
+        description: "",
+        tokenId: "",
         image: "/empressvalor.png",
+        traits: [
+          {
+            reward: 1068.80,
+          },
+          { 
+            rarity: "R",
+          }
+        ]
       },
       {
         id: "3",
         name: "Athena Valkyrie",
-        reward: 835.00,
+        description: "",
+        tokenId: "",
         image: "/athenavalkyrie.png",
+        traits: [
+          {
+            reward: 835.00,
+          },
+          { 
+            rarity: "R",
+          }
+        ]
       },
       {
         id: "4",
         name: "Titan",
-        reward: 633.74,
+        description: "",
+        tokenId: "",
         image: "/titan.png",
+        traits: [
+          {
+            reward: 633.74,
+          },
+          { 
+            rarity: "R",
+          }
+        ]
       },
       {
         id: "5",
         name: "Guardian",
-        reward: 593.78,
+        description: "",
+        tokenId: "",
         image: "/guardian.png",
+        traits: [
+          {
+            reward: 593.78,
+          },
+          { 
+            rarity: "R",
+          }
+        ]
       },
-    ],
-  },
-  {
-    rarity: "SR",
-    nfts: [
       {
         id: "6",
         name: "Golden",
+        description: "",
+        tokenId: "",
         image: "/golden.png",
-        reward: 13360.00,
+        traits: [
+          {
+            reward: 13360.00,
+          },
+          { 
+            rarity: "SR",
+          }
+        ]
       },
       {
         id: "7",
         name: "Squeaky",
-        reward: 8659.26,
+        description: "",
+        tokenId: "",
         image: "/squeaky.png",
+        traits: [
+          {
+            reward: 8659.26,
+          },
+          { 
+            rarity: "SR",
+          }
+        ]
       },
       {
         id: "8",
         name: "Golden Warrior",
+        description: "",
+        tokenId: "",
         reward: 6123.33,
         image: "/goldenwarrior.png",
+        traits: [
+          {
+            reward: 6123.33,
+          },
+          { 
+            rarity: "SR",
+          }
+        ]
       },
       {
         id: "9",
         name: "Blade",
-        reward: 3340.00,
+        description: "",
+        tokenId: "",
         image: "/bladeguardian.png",
+        traits: [
+          {
+            reward: 3340.00,
+          },
+          { 
+            rarity: "SR",
+          }
+        ]
       },
       {
         id: "10",
         name: "King Aegis",
-        reward: 2672.00,
+        description: "",
+        tokenId: "",
         image: "/kingaegis.png",
+        traits: [
+          {
+            reward: 2672.00,
+          },
+          { 
+            rarity: "SR",
+          }
+        ]
       },
     ],
   },
@@ -232,7 +322,7 @@ export const dataLevel = [
     totalCheckPoin: 1,
     checkpointDeduction: 2664,
     perHourEarn: 666,
-    perSecondEarn: 0,
+    perSecondEarn: 0.185,
     minReferral: 4,
     image: "/UrbanSurvivor.png",
     eligibleToClaimBonus: true,
@@ -245,6 +335,7 @@ export const dataLevel = [
     totalCheckPoin: 1,
     checkpointDeduction: 4440,
     perHourEarn: 1998,
+    perSecondEarn: 0.555,
     minReferral: 12,
     image: "/Hustler.png",
     eligibleToClaimBonus: true,
@@ -257,6 +348,7 @@ export const dataLevel = [
     totalCheckPoin: 1,
     checkpointDeduction: 102897,
     perHourEarn: 4662,
+    perSecondEarn: 1.295,
     minReferral: 3,
     minNftOwnership: 1,
     rarity: "R",
@@ -271,6 +363,7 @@ export const dataLevel = [
     totalCheckPoin: 1,
     checkpointDeduction: 102000,
     perHourEarn: 12654,
+    perSecondEarn: 3.515,
     minReferral: 5,
     minNftOwnership: 2,
     rarity: "R",
@@ -285,6 +378,7 @@ export const dataLevel = [
     totalCheckPoin: 1,
     checkpointDeduction: 207259,
     perHourEarn: 24376,
+    perSecondEarn: 6.7711,
     minReferral: 8,
     minNftOwnership: 1,
     rarity: "SR",
@@ -299,6 +393,7 @@ export const dataLevel = [
     totalCheckPoin: 1,
     checkpointDeduction: 393866,
     perHourEarn: 38442,
+    perSecondEarn: 10.6783,
     minReferral: 10,
     minNftOwnership: 2,
     rarity: "SR",
