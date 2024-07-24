@@ -148,6 +148,9 @@ const Page = () => {
     return address;
   };
 
+  console.log(levelImage)
+  console.log(userLevel)
+
   return (
     <div className="earn-sec bgs w-full flex flex-col justify-start items-center min-h-screen overflow-y-scroll relative my-5">
       {floatingNumbers.map((num) => (

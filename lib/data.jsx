@@ -56,11 +56,21 @@ export const dataUser = {
       ]
       
     },
-    // {
-    //   id: "7",
-    //   name: "Squeaky",
-    //   rarity: "SR",
-    // },
+    {
+      id: "7",
+      name: "Squeaky",
+      description: "",
+      tokenId: "",
+      image: "/squeaky.png",
+      traits: [
+        {
+          reward: 8659.26,
+        },
+        { 
+          rarity: "SR",
+        }
+      ]
+    },
     // {
     //   id: "6",
     //   name: "Golden",
@@ -155,7 +165,7 @@ export const dataReferral = [
 
 export const dataNFT = [
   {
-    rarity: "R",
+    
     nfts: [
       {
         id: "1",

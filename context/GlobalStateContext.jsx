@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { dataUser, dataReferral, dataLevel, dataNFT } from "@/lib/data";
 
 const GlobalStateContext = createContext();
@@ -36,13 +36,14 @@ export const GlobalStateProvider = ({ children }) => {
         }
       }
     });
+    console.log(`NFT Count - R: ${countR}, SR: ${countSR}`);
     return { countR, countSR };
   };
 
   const getNftRewardBonus = () => {
     let totalNftReward = 0;
-    dataUser.nfts.forEach(userNft => {
-      const rewardTrait = userNft.traits.find(trait => trait.reward);
+    dataUser.nfts.forEach((userNft) => {
+      const rewardTrait = userNft.traits.find((trait) => trait.reward);
       if (rewardTrait) {
         totalNftReward += rewardTrait.reward;
       }
@@ -51,6 +52,7 @@ export const GlobalStateProvider = ({ children }) => {
   };
 
   const checkLevelCriteria = (referrals, nftCountR, nftCountSR) => {
+    console.log(`Checking level criteria - Referrals: ${referrals}, R: ${nftCountR}, SR: ${nftCountSR}`);
     if (referrals >= 10 && nftCountSR >= 2) {
       return 6; // Billionaire Visionary
     }
@@ -79,16 +81,22 @@ export const GlobalStateProvider = ({ children }) => {
 
       newLevel = checkLevelCriteria(referrals, countR, countSR);
 
-      const currentLevelData = dataLevel.find(level => level.id === newLevel);
-      if (currentLevelData) {
-        newPerSecondEarn = currentLevelData.perSecondEarn;
-        newHourEarn = currentLevelData.perHourEarn;
-        setLevelImage(currentLevelData.image);
-        setUserLevel(currentLevelData.name); // Set the user level name for display
+      console.log(`New level: ${newLevel}`);
+
+      const currentLevelData = dataLevel.find(level => level.id === String(newLevel));
+      if (!currentLevelData) {
+        console.error(`Level data not found for level ID: ${newLevel}`);
+        return;
       }
 
+      newPerSecondEarn = currentLevelData.perSecondEarn;
+      newHourEarn = currentLevelData.perHourEarn;
+      setLevelImage(currentLevelData.image);
+      setUserLevel(currentLevelData.name); // Set the user level name for display
       setPerSecondEarn(newPerSecondEarn);
       setHourEarn(newHourEarn);
+
+      console.log(`Updated level details - Level: ${currentLevelData.name}, PerSecondEarn: ${newPerSecondEarn}, PerHourEarn: ${newHourEarn}`);
     };
 
     calculateLevel();
@@ -97,11 +105,15 @@ export const GlobalStateProvider = ({ children }) => {
 
   useEffect(() => {
     const updatePointsReached = () => {
-      const currentLevelData = dataLevel.find((levelData) => levelData.name === userLevel);
+      const currentLevelData = dataLevel.find(
+        levelData => levelData.name === userLevel
+      );
       if (currentLevelData) {
-        setPointsReached(prevState => ({
+        setPointsReached((prevState) => ({
           ...prevState,
-          [userLevel]: balanceAirdrop >= currentLevelData.minimumPoint || prevState[userLevel]
+          [userLevel]:
+            balanceAirdrop >= currentLevelData.minimumPoint ||
+            prevState[userLevel],
         }));
       }
     };
@@ -117,11 +129,11 @@ export const GlobalStateProvider = ({ children }) => {
     let interval;
     if (timer > 0) {
       interval = setInterval(() => {
-        setTimer((prev) => Math.max(prev - 1, 0));
+        setTimer(prev => Math.max(prev - 1, 0));
         if (timer <= 3590) {
           setCanClaim(true);
         }
-        setClaimableCoins((prev) => prev + perSecondEarn);
+        setClaimableCoins(prev => prev + perSecondEarn);
       }, 1000);
     } else {
       clearInterval(interval);
@@ -130,37 +142,39 @@ export const GlobalStateProvider = ({ children }) => {
   }, [timer, perSecondEarn]);
 
   return (
-    <GlobalStateContext.Provider value={{
-      balance,
-      setBalance,
-      balanceAirdrop,
-      setBalanceAirdrop,
-      balanceFarming,
-      setBalanceFarming,
-      referrals,
-      setRefferals,
-      hourEarn,
-      timer,
-      setTimer,
-      canClaim,
-      setCanClaim,
-      claimableCoins,
-      setClaimableCoins,
-      userLevel,
-      perSecondEarn,
-      levelImage,
-      nftRewardBonus,
-      getNftCountAndRarity,
-      checkpointDone,
-      setCheckpointDone,
-      checkpointCount,
-      setCheckpointCount,
-      pointsReached,
-      lastCheckpointDate,
-      setLastCheckpointDate,
-      userNFTs,
-      hasCompletedCheckpoint,
-    }}>
+    <GlobalStateContext.Provider
+      value={{
+        balance,
+        setBalance,
+        balanceAirdrop,
+        setBalanceAirdrop,
+        balanceFarming,
+        setBalanceFarming,
+        referrals,
+        setRefferals,
+        hourEarn,
+        timer,
+        setTimer,
+        canClaim,
+        setCanClaim,
+        claimableCoins,
+        setClaimableCoins,
+        userLevel,
+        perSecondEarn,
+        levelImage,
+        nftRewardBonus,
+        getNftCountAndRarity,
+        checkpointDone,
+        setCheckpointDone,
+        checkpointCount,
+        setCheckpointCount,
+        pointsReached,
+        lastCheckpointDate,
+        setLastCheckpointDate,
+        userNFTs,
+        hasCompletedCheckpoint,
+      }}
+    >
       {children}
     </GlobalStateContext.Provider>
   );
