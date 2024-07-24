@@ -62,10 +62,8 @@ const Page = () => {
                   <p className="text-gray-400 text-[12px]">{referral.name}</p>
                 </div>
                 <div className="flex flex-col">
-                <p className=" font-regular text-[12px]">
-                  Total Refferal 
-                </p>
-                <p className="text-end">{referral.totalFriendsReferral}</p>
+                  <p className="font-regular text-[12px]">Total Points</p>
+                  <p className="text-end">{referral.balanceAirdrop}</p>
                 </div>
               </div>
             ))}

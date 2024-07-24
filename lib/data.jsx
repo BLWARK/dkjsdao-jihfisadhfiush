@@ -71,6 +71,21 @@ export const dataUser = {
         }
       ]
     },
+    {
+      id: "6",
+      name: "Golden",
+      description: "",
+      tokenId: "",
+      image: "/golden.png",
+      traits: [
+        {
+          reward: 13360.00,
+        },
+        { 
+          rarity: "SR",
+        }
+      ]
+    },
     // {
     //   id: "6",
     //   name: "Golden",
@@ -97,67 +112,67 @@ export const dataReferral = [
         userName_Telegram: "@Cryptohell",
         name: "Fhay",
         totalFriendsReferral: 1,
-        points: 700, // Point for referral 2
+        balanceAirdrop: 700, // Point for referral 2
       },
       {
         userName_Telegram: "@Ronin",
         name: "Noclear",
         totalFriendsReferral: 1,
-        points: 800, // Point for referral 3
+        balanceAirdrop: 800, // Point for referral 3
       },
       {
         userName_Telegram: "@User4",
         name: "User Four",
         totalFriendsReferral: 1,
-        points: 1000, // Point for referral 4
+        balanceAirdrop: 1000, // Point for referral 4
       },
       {
         userName_Telegram: "@User5",
         name: "User Five",
         totalFriendsReferral: 1,
-        points: 750, // Point for referral 5
+        balanceAirdrop: 750, // Point for referral 5
       },
       {
         userName_Telegram: "@User6",
         name: "User Six",
         totalFriendsReferral: 1,
-        points: 850, // Point for referral 6
+        balanceAirdrop: 850, // Point for referral 6
       },
       {
         userName_Telegram: "@User7",
         name: "User Seven",
         totalFriendsReferral: 1,
-        points: 900, // Point for referral 7
+        balanceAirdrop: 900, // Point for referral 7
       },
       {
         userName_Telegram: "@User8",
         name: "User Eight",
         totalFriendsReferral: 1,
-        points: 950, // Point for referral 8
+        balanceAirdrop: 950, // Point for referral 8
       },
       {
         userName_Telegram: "@User9",
         name: "User Nine",
         totalFriendsReferral: 1,
-        points: 700, // Point for referral 9
+        balanceAirdrop: 700, // Point for referral 9
       },
       {
         userName_Telegram: "@User10",
         name: "User Ten",
         totalFriendsReferral: 1,
-        points: 1000, // Point for referral 10
+        balanceAirdrop: 1000, // Point for referral 10
       },
       {
         userName_Telegram: "@User11",
         name: "User Eleven",
         totalFriendsReferral: 1,
-        points: 666, // Point for referral 11
+        balanceAirdrop: 666, // Point for referral 11
       },
       {
         userName_Telegram: "@User12",
         name: "User Twelve",
         totalFriendsReferral: 1,
-        points: 666, // Point for referral 12
+        balanceAirdrop: 666, // Point for referral 12
       },
     ],
   },
