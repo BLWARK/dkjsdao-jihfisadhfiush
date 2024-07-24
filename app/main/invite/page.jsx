@@ -63,7 +63,7 @@ const Page = () => {
                 </div>
                 <div className="flex flex-col">
                   <p className="font-regular text-[12px]">Total Points</p>
-                  <p className="text-end">{referral.balanceAirdrop}</p>
+                  <p className="text-end text-[12px]">{referral.balanceAirdrop}</p>
                 </div>
               </div>
             ))}

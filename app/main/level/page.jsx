@@ -37,6 +37,14 @@ const Page = () => {
     </Link>
   );
 
+  const NotEligibleButton = () => (
+    <span className="bg-red-500 text-white px-2 py-1 rounded text-[8px]">Not Eligible</span>
+  );
+
+  const EligibleButton = () => (
+    <span className="bg-green-500 text-white px-2 py-1 rounded text-[8px]">Eligible</span>
+  );
+
   const renderNftRequirement = (level) => {
     const { minNftOwnership, rarity } = level;
 
@@ -75,6 +83,20 @@ const Page = () => {
     );
   };
 
+  const renderEligibilityStatus = () => {
+    const currentLevelData = dataLevel.find(levelData => levelData.name === userLevel);
+    if (!currentLevelData) return null;
+
+    const isEligible = hasCompletedCheckpoint() && referrals >= currentLevelData.minReferral && (balanceAirdrop >= currentLevelData.minimumPoint || pointsReached[userLevel]) && (!currentLevelData.minNftOwnership || getNftCountAndRarity()[currentLevelData.rarity === "R" ? "countR" : "countSR"] >= currentLevelData.minNftOwnership);
+
+    return (
+      <li className="font-regular text-[12px] flex justify-between items-center w-full gap-4">
+        <div>Eligibility Status</div>
+        {isEligible ? <EligibleButton /> : <NotEligibleButton />}
+      </li>
+    );
+  };
+
   const renderTasksForNextLevel = (level) => {
     const nextLevelIndex = dataLevel.findIndex(lvl => lvl.name === level) + 1;
     if (nextLevelIndex >= dataLevel.length) return null;
@@ -102,6 +124,7 @@ const Page = () => {
             </li>
           )}
           {nextLevel.minNftOwnership && renderNftRequirement(nextLevel)}
+          {renderEligibilityStatus()}
         </ul>
       </div>
     );
@@ -140,6 +163,7 @@ const Page = () => {
             </li>
           )}
           {currentLevelData.minNftOwnership && renderNftRequirement(currentLevelData)}
+          {renderEligibilityStatus()}
         </ul>
       </div>
     );
@@ -150,13 +174,12 @@ const Page = () => {
   return (
     <div className="level-info-sec bgs w-full min-h-screen flex flex-col justify-start items-center overflow-y-scroll ">
       <div className="balance mt-5 flex justify-center items-center gap-2 ">
-        <div onClick={handleLevelInfoClick}  className="wrap-level w-full flex flex-col justify-center items-center">
+        <div onClick={handleLevelInfoClick} className="wrap-level w-full flex flex-col justify-center items-center">
           <div className="wrap-icon-coin w-full flex justify-center items-center gap-2 mt-2">
-            <p  className="text-white text-[28px] font-bold">{userLevel}</p>
+            <p className="text-white text-[28px] font-bold">{userLevel}</p>
             <AiOutlineQuestionCircle
               className="text-white cursor-pointer"
               size={20}
-              
             />
           </div>
           <div className="wrap-icon-coin w-full flex justify-center items-center gap-2">
@@ -167,13 +190,12 @@ const Page = () => {
           </div>
         </div>
       </div>
-      <div className="custom-wrap-slider w-full flex justify-center items-center  -mt-10">
+      <div className="custom-wrap-slider w-full flex justify-center items-center -mt-10">
         <div className="custom-slider-container flex justify-center items-center overflow-hidden w-full ">
-          
           <div className="custom-slide flex flex-col justify-center items-center w-full h-[400px]">
             {levelImage && (
               <Image
-                src={levelImage} // Gunakan URL gambar level pengguna
+                src={levelImage}
                 alt={userLevel}
                 width={250}
                 height={250}
@@ -202,12 +224,11 @@ const Page = () => {
               &times;
             </button>
             <h2 className="font-bold text-[16px] mb-2 mt-4 text-left text-blue-400">How to Level Up</h2>
-            <p className="text-left mb-2 text-[12px] ">To level up, you need to fulfill the following criteria:</p>
+            <p className="text-left mb-2 text-[12px]">To level up, you need to fulfill the following criteria:</p>
             <ul className="list-disc list-inside text-left mb-4 text-[12px]">
               <li>Reach the required number of referrals.</li>
               <li>Ensure each referral has the required points.</li>
               <li>Own the required number and rarity of NFTs.</li>
-              
             </ul>
             <h2 className="font-bold text-[16px] mt-10 mb-2 text-left text-blue-400">How to be Eligible for Rewards</h2>
             <p className="text-left mb-2 text-[12px]">To be eligible for rewards, you need to meet the following criteria:</p>

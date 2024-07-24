@@ -3,7 +3,7 @@ export const dataUser = {
   name_Telegram: "Rhonald bastian",
   userLevel: "",
   walletAddress: "0x2fFfd254b7EF5C327F7772a539fc6F02Cd641Eca",
-  balanceAirdrop: 159839,
+  balanceAirdrop: 7877315,
   totalDailyCheckPoint: 0,
   checkpointDeduction: 0, // checkPointBalanceAirdropDeduction
   timer: {
