@@ -83,11 +83,11 @@ const Page = () => {
     );
   };
 
-  const renderEligibilityStatus = () => {
-    const currentLevelData = dataLevel.find(levelData => levelData.name === userLevel);
+  const renderEligibilityStatus = (level) => {
+    const currentLevelData = dataLevel.find(levelData => levelData.name === level);
     if (!currentLevelData) return null;
 
-    const isEligible = hasCompletedCheckpoint() && referrals >= currentLevelData.minReferral && (balanceAirdrop >= currentLevelData.minimumPoint || pointsReached[userLevel]) && (!currentLevelData.minNftOwnership || getNftCountAndRarity()[currentLevelData.rarity === "R" ? "countR" : "countSR"] >= currentLevelData.minNftOwnership);
+    const isEligible = hasCompletedCheckpoint() && referrals >= currentLevelData.minReferral && (balanceAirdrop >= currentLevelData.minimumPoint || pointsReached[level]) && (!currentLevelData.minNftOwnership || getNftCountAndRarity()[currentLevelData.rarity === "R" ? "countR" : "countSR"] >= currentLevelData.minNftOwnership);
 
     return (
       <li className="font-regular text-[12px] flex justify-between items-center w-full gap-4">
@@ -104,7 +104,7 @@ const Page = () => {
 
     return (
       <div className="info1 gap-2 flex flex-col justify-start items-start">
-        <p className="font-bold text-[16px] text-blue-300 flex flex-col mb-3">
+        <p className="font-bold text-[16px] text-blue-300 flex flex-col mb-2">
           Next Level: 
           <span>
           {nextLevel.name} ({nextLevel.perHourEarn} profit/hour)
@@ -124,7 +124,7 @@ const Page = () => {
             </li>
           )}
           {nextLevel.minNftOwnership && renderNftRequirement(nextLevel)}
-          {renderEligibilityStatus()}
+          {renderEligibilityStatus(nextLevel.name)}
         </ul>
       </div>
     );
@@ -135,7 +135,7 @@ const Page = () => {
 
     return (
       <div className="info1 gap-2 flex flex-col justify-start items-start">
-        <div className="flex flex-col justify-center items-start mb-3">
+        <div className="flex flex-col justify-center items-start mb-2">
           <p className="font-bold text-[16px] text-blue-300">
             {currentLevelData.name} ({currentLevelData.perHourEarn} profit/hour) :
           </p>
@@ -163,7 +163,7 @@ const Page = () => {
             </li>
           )}
           {currentLevelData.minNftOwnership && renderNftRequirement(currentLevelData)}
-          {renderEligibilityStatus()}
+          {renderEligibilityStatus(userLevel)}
         </ul>
       </div>
     );
@@ -172,7 +172,7 @@ const Page = () => {
   const currentLevelData = dataLevel.find((levelData) => levelData.name === userLevel);
 
   return (
-    <div className="level-info-sec bgs w-full min-h-screen flex flex-col justify-start items-center overflow-y-scroll ">
+    <div className="level-info-sec bgs w-full min-h-screen flex flex-col justify-start items-center overflow-y-scroll">
       <div className="balance mt-5 flex justify-center items-center gap-2 ">
         <div onClick={handleLevelInfoClick} className="wrap-level w-full flex flex-col justify-center items-center">
           <div className="wrap-icon-coin w-full flex justify-center items-center gap-2 mt-2">
@@ -191,7 +191,7 @@ const Page = () => {
         </div>
       </div>
       <div className="custom-wrap-slider w-full flex justify-center items-center -mt-10">
-        <div className="custom-slider-container flex justify-center items-center overflow-hidden w-full ">
+        <div className="custom-slider-container flex justify-center items-center overflow-hidden w-full">
           <div className="custom-slide flex flex-col justify-center items-center w-full h-[400px]">
             {levelImage && (
               <Image
@@ -205,8 +205,8 @@ const Page = () => {
           </div>
         </div>
       </div>
-      <div className="level-info-contain bgs flex flex-col justify-center items-center w-full h-[500px] rounded-3xl gap-2 -mt-10 ">
-        <div className="wrap-level w-full h-[1200px] flex justify-start items-start p-8">
+      <div className="level-info-contain  bgs flex flex-col justify-center items-center w-full h-[550px] rounded-3xl gap-2 -mt-12">
+        <div className="wrap-level w-full h-[2500px] flex justify-start items-start p-8">
           <div className="wrap-icon-coin w-full flex flex-col justify-start items-start gap-10">
             {renderCurrentLevelTasks()}
             {renderTasksForNextLevel(userLevel)}

@@ -56,41 +56,37 @@ export const dataUser = {
       ]
       
     },
-    {
-      id: "7",
-      name: "Squeaky",
-      description: "",
-      tokenId: "",
-      image: "/squeaky.png",
-      traits: [
-        {
-          reward: 8659.26,
-        },
-        { 
-          rarity: "SR",
-        }
-      ]
-    },
-    {
-      id: "6",
-      name: "Golden",
-      description: "",
-      tokenId: "",
-      image: "/golden.png",
-      traits: [
-        {
-          reward: 13360.00,
-        },
-        { 
-          rarity: "SR",
-        }
-      ]
-    },
+    // {
+    //   id: "7",
+    //   name: "Squeaky",
+    //   description: "",
+    //   tokenId: "",
+    //   image: "/squeaky.png",
+    //   traits: [
+    //     {
+    //       reward: 8659.26,
+    //     },
+    //     { 
+    //       rarity: "SR",
+    //     }
+    //   ]
+    // },
     // {
     //   id: "6",
     //   name: "Golden",
-    //   rarity: "SR",
+    //   description: "",
+    //   tokenId: "",
+    //   image: "/golden.png",
+    //   traits: [
+    //     {
+    //       reward: 13360.00,
+    //     },
+    //     { 
+    //       rarity: "SR",
+    //     }
+    //   ]
     // },
+    
     
   ],
 };
