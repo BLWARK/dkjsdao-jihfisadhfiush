@@ -34,16 +34,16 @@ export default function Home() {
   return (
     <div className="w-full flex min-h-screen flex-col items-center justify-start bgs">
       <div className="wrapper mt-14 flex justify-center items-center flex-col">
-      <div className="neons font-bold text-4xl flex justify-center items-center mt-6">
+      <div className="neons font-bold text-[28px] flex justify-center items-center mt-6">
       <div>WELCOME TO</div>
 	    <div>WELCOME TO</div>
 	    <div>WELCOME TO</div>
       </div>
       
-      <div className="neons font-bold text-4xl flex justify-center items-center mt-10">
-      <div>AIRDROP XYZMER</div>
-	    <div>AIRDROP XYZMER</div>
-	    <div>AIRDROP XYZMER</div>
+      <div className="neons font-bold text-[28px] flex justify-center items-center mt-10">
+      <div>PLAY TO EARN XYZMER</div>
+	    <div>PLAY TO EARN XYZMER</div>
+	    <div>PLAY TO EARN XYZMER</div>
       </div>
       
       <div className="wrap-logo coin  flex justify-center items-center mt-20 ">
