@@ -36,7 +36,7 @@ export const GlobalStateProvider = ({ children }) => {
         }
       }
     });
-    console.log(`NFT Count - R: ${countR}, SR: ${countSR}`);
+    
     return { countR, countSR };
   };
 
@@ -81,7 +81,7 @@ export const GlobalStateProvider = ({ children }) => {
 
       newLevel = checkLevelCriteria(referrals, countR, countSR);
 
-      console.log(`New level: ${newLevel}`);
+      
 
       const currentLevelData = dataLevel.find(level => level.id === String(newLevel));
       if (!currentLevelData) {
@@ -96,7 +96,7 @@ export const GlobalStateProvider = ({ children }) => {
       setPerSecondEarn(newPerSecondEarn);
       setHourEarn(newHourEarn);
 
-      console.log(`Updated level details - Level: ${currentLevelData.name}, PerSecondEarn: ${newPerSecondEarn}, PerHourEarn: ${newHourEarn}`);
+      
     };
 
     calculateLevel();

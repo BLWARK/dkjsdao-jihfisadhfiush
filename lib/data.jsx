@@ -2,8 +2,8 @@ export const dataUser = {
   userName_Telegram: "@Nobits88",
   name_Telegram: "Rhonald bastian",
   userLevel: "",
-  walletAddress: "0x2fFfd254b7EF5C327F7772a539fc6F02Cd641Eca",
-  balanceAirdrop: 7877315,
+  walletAddress: "", //0x2fFfd254b7EF5C327F7772a539fc6F02Cd641Eca
+  balanceAirdrop: 99999999999,
   totalDailyCheckPoint: 0,
   checkpointDeduction: 0, // checkPointBalanceAirdropDeduction
   timer: {
@@ -56,36 +56,36 @@ export const dataUser = {
       ]
       
     },
-    // {
-    //   id: "7",
-    //   name: "Squeaky",
-    //   description: "",
-    //   tokenId: "",
-    //   image: "/squeaky.png",
-    //   traits: [
-    //     {
-    //       reward: 8659.26,
-    //     },
-    //     { 
-    //       rarity: "SR",
-    //     }
-    //   ]
-    // },
-    // {
-    //   id: "6",
-    //   name: "Golden",
-    //   description: "",
-    //   tokenId: "",
-    //   image: "/golden.png",
-    //   traits: [
-    //     {
-    //       reward: 13360.00,
-    //     },
-    //     { 
-    //       rarity: "SR",
-    //     }
-    //   ]
-    // },
+    {
+      id: "7",
+      name: "Squeaky",
+      description: "",
+      tokenId: "",
+      image: "/squeaky.png",
+      traits: [
+        {
+          reward: 8659.26,
+        },
+        { 
+          rarity: "SR",
+        }
+      ]
+    },
+    {
+      id: "6",
+      name: "Golden",
+      description: "",
+      tokenId: "",
+      image: "/golden.png",
+      traits: [
+        {
+          reward: 13360.00,
+        },
+        { 
+          rarity: "SR",
+        }
+      ]
+    },
     
     
   ],

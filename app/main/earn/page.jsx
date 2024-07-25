@@ -63,6 +63,7 @@ const Page = () => {
       const valueToAdd = perSecondEarn;
       setBalance((prev) => prev + valueToAdd);
       setBalanceAirdrop((prev) => prev + valueToAdd);
+      setTimer((prev) => prev + 1); // Tambahkan 1 detik ke timer setiap kali gambar diklik
       setClaimableCoins((prev) => {
         const newClaimableCoins = prev - valueToAdd;
         if (newClaimableCoins <= 0) {
@@ -147,9 +148,6 @@ const Page = () => {
     }
     return address;
   };
-
-  console.log(levelImage)
-  console.log(userLevel)
 
   return (
     <div className="earn-sec bgs w-full flex flex-col justify-start items-center min-h-screen overflow-y-scroll relative my-5">

@@ -59,7 +59,8 @@ const Page = () => {
       <div className="farm-wrap w-full px-4 flex flex-col justify-center items-center mt-5 relative">
         <div className="title flex flex-col w-full justify-start items-start mt-3">
           <p className='font-bold text-[30px]'>Your NFTs</p>
-          <p className='font-regular text-gray-400 text-[14px]'>Buy your heroes for extra bonus rewards and rapid level growth.</p>
+          <p className='font-regular text-gray-400 text-[14px]'>Buy your heroes for extra bonus rewards and rapid level growth. </p>
+          <p className='font-regular italic text-red-500 text-[10px]'> (You are permitted to own a maximum of 5 NFTs. Any additional NFTs beyond the sixth will not be counted towards bonus rewards.)</p>
         </div>
 
         <div className="farm-card w-full flex flex-col justify-center items-center mt-5">
