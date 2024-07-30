@@ -3,7 +3,7 @@ export const dataUser = {
   name_Telegram: "Rhonald bastian",
   userLevel: "",
   walletAddress: "0x2fFfd254b7EF5C327F7772a539fc6F02Cd641Eca", //0x2fFfd254b7EF5C327F7772a539fc6F02Cd641Eca
-  balanceAirdrop: 12788766,
+  balanceAirdrop: 502664,
   totalDailyCheckPoint: 0,
   checkpointDeduction: 0, // checkPointBalanceAirdropDeduction
   timer: {
@@ -40,52 +40,52 @@ export const dataUser = {
         }
       ]
      },
-    {
-      id: "2",
-      name: "Empress Valor",
-      description: "",
-      tokenId: "",
-      image: "/empressvalor.png",
-      traits: [
-        {
-          reward: 1068.80,
-        },
-        { 
-          rarity: "R",
-        }
-      ]
+    // {
+    //   id: "2",
+    //   name: "Empress Valor",
+    //   description: "",
+    //   tokenId: "",
+    //   image: "/empressvalor.png",
+    //   traits: [
+    //     {
+    //       reward: 1068.80,
+    //     },
+    //     { 
+    //       rarity: "R",
+    //     }
+    //   ]
       
-    },
-    {
-      id: "7",
-      name: "Squeaky",
-      description: "",
-      tokenId: "",
-      image: "/squeaky.png",
-      traits: [
-        {
-          reward: 8659.26,
-        },
-        { 
-          rarity: "SR",
-        }
-      ]
-    },
-    {
-      id: "6",
-      name: "Golden",
-      description: "",
-      tokenId: "",
-      image: "/golden.png",
-      traits: [
-        {
-          reward: 13360.00,
-        },
-        { 
-          rarity: "SR",
-        }
-      ]
-    },
+    // },
+    // {
+    //   id: "7",
+    //   name: "Squeaky",
+    //   description: "",
+    //   tokenId: "",
+    //   image: "/squeaky.png",
+    //   traits: [
+    //     {
+    //       reward: 8659.26,
+    //     },
+    //     { 
+    //       rarity: "SR",
+    //     }
+    //   ]
+    // },
+    // {
+    //   id: "6",
+    //   name: "Golden",
+    //   description: "",
+    //   tokenId: "",
+    //   image: "/golden.png",
+    //   traits: [
+    //     {
+    //       reward: 13360.00,
+    //     },
+    //     { 
+    //       rarity: "SR",
+    //     }
+    //   ]
+    // },
     
     
   ],
@@ -340,7 +340,7 @@ export const dataLevel = [
     name: "Urban Survivor",
     task: 1,
     minimumPoint: 159840,
-    totalCheckPoin: 1,
+    totalCheckPoin: 60,
     checkpointDeduction: 2664,
     perHourEarn: 666,
     perSecondEarn: 0.185,
@@ -353,7 +353,7 @@ export const dataLevel = [
     name: "Hustler",
     task: 2,
     minimumPoint: 399600,
-    totalCheckPoin: 1,
+    totalCheckPoin: 90,
     checkpointDeduction: 4440,
     perHourEarn: 1998,
     perSecondEarn: 0.555,
@@ -366,7 +366,7 @@ export const dataLevel = [
     name: "Street Trader",
     task: 3,
     minimumPoint: 446220,
-    totalCheckPoin: 1,
+    totalCheckPoin: 5,
     checkpointDeduction: 102897,
     perHourEarn: 4662,
     perSecondEarn: 1.295,
@@ -381,7 +381,7 @@ export const dataLevel = [
     name: "Small Biz Tycoon",
     task: 4,
     minimumPoint: 1028970,
-    totalCheckPoin: 1,
+    totalCheckPoin: 10,
     checkpointDeduction: 102000,
     perHourEarn: 12654,
     perSecondEarn: 3.515,
@@ -396,7 +396,7 @@ export const dataLevel = [
     name: "Enterprise Leader",
     task: 5,
     minimumPoint: 3108888,
-    totalCheckPoin: 1,
+    totalCheckPoin: 15,
     checkpointDeduction: 207259,
     perHourEarn: 24376,
     perSecondEarn: 6.7711,
@@ -411,7 +411,7 @@ export const dataLevel = [
     name: "Billionaire Visionary",
     task: 6,
     minimumPoint: 7877315,
-    totalCheckPoin: 1,
+    totalCheckPoin: 20,
     checkpointDeduction: 393866,
     perHourEarn: 38442,
     perSecondEarn: 10.6783,

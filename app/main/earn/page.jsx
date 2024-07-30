@@ -169,7 +169,7 @@ const Page = () => {
       ))}
       <div className="wrap-farm w-full px-4 flex flex-col justify-center items-center ">
         <div className="top-sec w-full flex justify-between items-center ">
-          <div className="top-user w-[60%] flex items-center justify-start gap-2">
+          <div className="top-user w-[50%] flex items-center justify-start gap-2">
             <button className="gap-2 px-2 flex flex-col justify-start items-start ">
               <p className=" text-[12px] font-bold">Hi, {dataUser ? dataUser?.userName_Telegram : 'Loading...'}</p>
               <Link href="/main/level" className="flex justify-center items-center text-blue-400 ">
@@ -179,9 +179,9 @@ const Page = () => {
               </Link>
             </button>
           </div>
-          <div className="top-user w-[40%] flex items-center justify-end gap-2">
+          <div className="top-user w-[50%] flex items-center justify-end gap-2">
             <button 
-              className={`gap-2 but p-4 flex justify-center items-center rounded-xl ${walletAddress ? 'cursor-not-allowed' : ''}`} 
+              className={`gap-2 but p-4 flex justify-center items-center rounded-xl ${walletAddress ? 'Disable' : ''}`} 
               onClick={handleConnectWalletClick}
               disabled={!!walletAddress}
             >
