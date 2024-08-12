@@ -10,7 +10,6 @@ import { useGlobalState } from "@/context/GlobalStateContext";
 import Image from "next/image";
 import CountUp from 'react-countup';
 
-// Dynamically import icons
 const getIconComponent = (iconName) => {
   const iconMap = {
     IoMdPersonAdd: IoMdPersonAdd,
@@ -24,12 +23,14 @@ const getIconComponent = (iconName) => {
 };
 
 const Page = () => {
-  const { balanceAirdrop, setBalanceAirdrop, userLevel, checkpointDone, setCheckpointDone, checkpointCount, setCheckpointCount, lastCheckpointDate, setLastCheckpointDate } = useGlobalState();
+  const { balanceAirdrop, setBalanceAirdrop, userLevel, checkpointDone, setCheckpointDone, checkpointCount, setCheckpointCount, lastCheckpointDate, setLastCheckpointDate, completedTasks, setCompletedTasks } = useGlobalState();
   const [showPopup, setShowPopup] = useState(false);
   const [showReviewPopup, setShowReviewPopup] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [canClaim, setCanClaim] = useState(false);
+  const [taskStarted, setTaskStarted] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
   const [showCheckpointInfoPopup, setShowCheckpointInfoPopup] = useState(false);
   const [showInsufficientBalancePopup, setShowInsufficientBalancePopup] = useState(false);
@@ -43,8 +44,10 @@ const Page = () => {
   }, [balanceAirdrop]);
 
   const handleTaskClick = (taskId) => {
+    if (completedTasks.includes(taskId)) return; // Cegah klik jika tugas sudah selesai
     const task = dataTask.find(t => t.id === taskId);
     setSelectedTask(task);
+    setTaskStarted(false); // Reset taskStarted setiap kali task dipilih
     if (task.name === "Daily Checkpoint" && checkpointDone) {
       setShowCheckpointInfoPopup(true);
     } else {
@@ -57,12 +60,13 @@ const Page = () => {
     setSelectedTask(null);
     setUploadedFile(null);
     setCanClaim(false);
+    setTaskStarted(false); // Reset taskStarted saat popup ditutup
     setWalletAddress('');
   };
 
   const handleFileChange = (event) => {
     setUploadedFile(event.target.files[0]);
-    if (event.target.files[0]) {
+    if (taskStarted && event.target.files[0]) { // Cek jika task sudah dimulai dan file sudah diupload
       setCanClaim(true);
     } else {
       setCanClaim(false);
@@ -72,18 +76,34 @@ const Page = () => {
   const handleStart = () => {
     if (selectedTask && selectedTask.link) {
       window.open(selectedTask.link, "_blank");
-      setCanClaim(true);
+      setTaskStarted(true); // Set taskStarted menjadi true saat tombol Start diklik
+      if (uploadedFile) {
+        setCanClaim(true);
+      }
     }
   };
 
   const handleSend = () => {
-    setShowReviewPopup(true);
-    handleClosePopup();
+    if (selectedTask && canClaim) {
+      // Tambahkan reward ke balance airdrop
+      const newBalance = balanceAirdrop + selectedTask.reward;
+      setBalanceAirdrop(newBalance); // Perbarui saldo airdrop di Global State
+
+      // Tandai tugas sebagai selesai
+      setCompletedTasks(prevState => [...prevState, selectedTask.id]);
+
+      setShowSuccessPopup(true); // Tampilkan popup sukses
+      handleClosePopup();
+    }
+  };
+
+  const handleCloseSuccessPopup = () => {
+    setShowSuccessPopup(false);
   };
 
   const handleCheckpoint = () => {
     const levelData = dataLevel.find(level => level.name === userLevel);
-    const todayUTC = new Date().toISOString().split('T')[0]; // Ambil tanggal UTC hari ini
+    const todayUTC = new Date().toISOString().split('T')[0];
 
     if (lastCheckpointDate === todayUTC) {
       setShowCheckpointInfoPopup(true);
@@ -96,7 +116,7 @@ const Page = () => {
         setBalanceAirdrop(newBalance);
         setCheckpointCount(checkpointCount + 1);
         setCheckpointDone(true);
-        setLastCheckpointDate(todayUTC); // Perbarui tanggal checkpoint terakhir ke hari ini
+        setLastCheckpointDate(todayUTC);
       } else {
         setShowInsufficientBalancePopup(true);
       }
@@ -146,11 +166,13 @@ const Page = () => {
           {dailyTasks.sort((a, b) => a.id === 13 ? -1 : b.id === 13 ? 1 : 0).map((task) => {
             const IconComponent = getIconComponent(task.icon);
             const levelData = dataLevel.find(level => level.name === userLevel);
+            const isTaskCompleted = completedTasks.includes(task.id); // Cek apakah tugas sudah selesai
             return (
               <button
                 key={task.id}
-                className="Task-add w-[360px] h-[80px] flex justify-center items-center bgs rounded-2xl gap-5 px-5 mt-5"
+                className={`Task-add w-[360px] h-[80px] flex justify-center items-center bgs rounded-2xl gap-5 px-5 mt-5 ${isTaskCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => handleTaskClick(task.id)}
+                disabled={isTaskCompleted} // Nonaktifkan tombol jika tugas sudah selesai
               >
                 <div className="icon w-[15%] flex justify-center items-center text-3xl">
                   {IconComponent ? <IconComponent /> : <Image src={task.icon} alt={task.name} width={60} height={60} />}
@@ -171,7 +193,9 @@ const Page = () => {
                   )}
                 </div>
                 <div className="icon w-[5%] flex justify-center items-center">
-                  {task.checkpoint && checkpointDone ? (
+                  {isTaskCompleted ? (
+                    <FaCheck className="text-green-500" /> // Ubah ikon panah menjadi centang
+                  ) : task.checkpoint && checkpointDone ? (
                     <FaCheck className="text-green-500" />
                   ) : (
                     <IoIosArrowForward />
@@ -187,11 +211,13 @@ const Page = () => {
         <div className="all-task overflow-y-scroll h-[440px] gap-6 mt-2">
           {taskList.map((task) => {
             const IconComponent = getIconComponent(task.icon);
+            const isTaskCompleted = completedTasks.includes(task.id); // Cek apakah tugas sudah selesai
             return (
               <button
                 key={task.id}
-                className="Task w-[360px] h-[80px] flex justify-center items-center bgs rounded-2xl gap-5 px-5 mt-5"
+                className={`Task w-[360px] h-[80px] flex justify-center items-center bgs rounded-2xl gap-5 px-5 mt-5 ${isTaskCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => handleTaskClick(task.id)}
+                disabled={isTaskCompleted} // Nonaktifkan tombol jika tugas sudah selesai
               >
                 <div className="icon w-[15%] flex justify-center items-center text-3xl">
                   {IconComponent ? <IconComponent /> : <Image src={task.icon} alt={task.name} width={60} height={60} />}
@@ -205,7 +231,11 @@ const Page = () => {
                   </p>
                 </div>
                 <div className="icon w-[5%] flex justify-center items-center">
-                  <IoIosArrowForward />
+                  {isTaskCompleted ? (
+                    <FaCheck className="text-green-500" /> // Ubah ikon panah menjadi centang
+                  ) : (
+                    <IoIosArrowForward />
+                  )}
                 </div>
               </button>
             );
@@ -218,11 +248,13 @@ const Page = () => {
         <div className="all-task overflow-y-scroll h-[440px] gap-6 mt-2">
           {specialTasks.map((task) => {
             const IconComponent = getIconComponent(task.icon);
+            const isTaskCompleted = completedTasks.includes(task.id); // Cek apakah tugas sudah selesai
             return (
               <button
                 key={task.id}
-                className="Task w-[360px] h-[80px] flex justify-center items-center bgs rounded-2xl gap-5 px-5 mt-5"
+                className={`Task w-[360px] h-[80px] flex justify-center items-center bgs rounded-2xl gap-5 px-5 mt-5 ${isTaskCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={() => handleTaskClick(task.id)}
+                disabled={isTaskCompleted} // Nonaktifkan tombol jika tugas sudah selesai
               >
                 <div className="icon w-[15%] flex justify-center items-center text-3xl">
                   {IconComponent ? <IconComponent /> : <Image src={task.icon} alt={task.name} width={60} height={60} />}
@@ -236,7 +268,11 @@ const Page = () => {
                   </p>
                 </div>
                 <div className="icon w-[5%] flex justify-center items-center">
-                  <IoIosArrowForward />
+                  {isTaskCompleted ? (
+                    <FaCheck className="text-green-500" /> // Ubah ikon panah menjadi centang
+                  ) : (
+                    <IoIosArrowForward />
+                  )}
                 </div>
               </button>
             );
@@ -288,7 +324,7 @@ const Page = () => {
                   <span>Why should I checkpoint daily?</span>
                 </div>
               </div>
-            ) : (
+            ) : selectedTask.name === "Retweet our Tweet on X" || selectedTask.name === "Invite Friends" || selectedTask.name === "Visit Xyznt.io Marketplace" || selectedTask.name === "Join our Telegram community" ? (
               <>
                 <div className="wrap-title flex flex-col justify-start items-start">
                   <p className="mb-4 text-left text-white">Your Task</p>
@@ -306,10 +342,31 @@ const Page = () => {
                   </button>
                   <button
                     onClick={handleSend}
-                    className={`but py-2 px-4 rounded-lg ${!uploadedFile ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={!uploadedFile}
+                    className={`but py-2 px-4 rounded-lg ${!(taskStarted && uploadedFile) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={!(taskStarted && uploadedFile)}
                   >
                     Send
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="wrap-title flex flex-col justify-start items-start">
+                  <p className="mb-4 text-left text-white">Your Task</p>
+                  <p className="mb-4 text-left text-white text-[10px] italic">Click start, Do your task, then complete the steps</p>
+                </div>
+                <div className="flex justify-center gap-4 mt-10">
+                  <button
+                    className="but py-2 px-4 rounded-lg"
+                    onClick={handleStart}
+                  >
+                    Start
+                  </button>
+                  <button
+                    onClick={handleSend}
+                    className="but py-2 px-4 rounded-lg"
+                  >
+                    Complete
                   </button>
                 </div>
               </>
@@ -325,6 +382,19 @@ const Page = () => {
             <p className="mb-4 text-white font-bold text-lg mt-5">Reward Notification</p>
             <p className="mb-4 text-white">Your reward is under review and will be sent within 5 hours.</p>
             <button className="but py-2 px-4 rounded-lg" onClick={() => setShowReviewPopup(false)}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Success Popup */}
+      {showSuccessPopup && (
+        <div className="popup fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="popup-content bgs w-[350px] h-[280px] rounded-lg shadow-lg text-center flex flex-col p-5 gap-5 relative">
+            <p className="mb-4 text-white font-bold text-lg mt-5">Success!</p>
+            <p className="mb-4 text-white">Your task has been completed and your reward has been added to your balance.</p>
+            <button className="but py-2 px-4 rounded-lg" onClick={handleCloseSuccessPopup}>
               Close
             </button>
           </div>

@@ -50,7 +50,7 @@ export default function Home() {
       <Image src="/XYZMER COIN.png" alt="Logo" width={250} height={250}  />
       </div>
       
-      <Link href="/main/earn">
+      <Link href="https://t.me/Xyzmercoin_bot">
       <div className="connect-wallet mt-20 flex justify-center items-center">
       
         <p className="w-[300px] h-[65px] font-bold but rounded-full flex justify-center items-center gap-3"><FaTelegramPlane  className="text-[22px]"/> Login With Telegram</p>

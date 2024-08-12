@@ -22,6 +22,7 @@ export const GlobalStateProvider = ({ children }) => {
   const [pointsReached, setPointsReached] = useState({});
   const [lastCheckpointDate, setLastCheckpointDate] = useState("");
   const [userNFTs, setUserNFTs] = useState(dataUser.nfts);
+  const [completedTasks, setCompletedTasks] = useState([]); // State untuk menyimpan task yang selesai
 
   const getNftCountAndRarity = () => {
     let countR = 0;
@@ -52,7 +53,6 @@ export const GlobalStateProvider = ({ children }) => {
   };
 
   const checkLevelCriteria = (referrals, nftCountR, nftCountSR) => {
-    console.log(`Checking level criteria - Referrals: ${referrals}, R: ${nftCountR}, SR: ${nftCountSR}`);
     if (referrals >= 10 && nftCountSR >= 2) {
       return 6; // Billionaire Visionary
     }
@@ -81,8 +81,6 @@ export const GlobalStateProvider = ({ children }) => {
 
       newLevel = checkLevelCriteria(referrals, countR, countSR);
 
-      
-
       const currentLevelData = dataLevel.find(level => level.id === String(newLevel));
       if (!currentLevelData) {
         console.error(`Level data not found for level ID: ${newLevel}`);
@@ -95,8 +93,6 @@ export const GlobalStateProvider = ({ children }) => {
       setUserLevel(currentLevelData.name); // Set the user level name for display
       setPerSecondEarn(newPerSecondEarn);
       setHourEarn(newHourEarn);
-
-      
     };
 
     calculateLevel();
@@ -141,6 +137,10 @@ export const GlobalStateProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [timer, perSecondEarn]);
 
+  const addCompletedTask = (taskId) => {
+    setCompletedTasks(prevState => [...prevState, taskId]);
+  };
+
   return (
     <GlobalStateContext.Provider
       value={{
@@ -173,6 +173,8 @@ export const GlobalStateProvider = ({ children }) => {
         setLastCheckpointDate,
         userNFTs,
         hasCompletedCheckpoint,
+        completedTasks, // State baru untuk menyimpan task yang selesai
+        setCompletedTasks, // Fungsi untuk menambahkan task ke daftar completedTasks
       }}
     >
       {children}

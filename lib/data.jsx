@@ -2,7 +2,7 @@ export const dataUser = {
   userName_Telegram: "@Nobits88",
   name_Telegram: "Rhonald bastian",
   userLevel: "",
-  walletAddress: "0x2fFfd254b7EF5C327F7772a539fc6F02Cd641Eca", //0x2fFfd254b7EF5C327F7772a539fc6F02Cd641Eca
+  walletAddress: "", //0x2fFfd254b7EF5C327F7772a539fc6F02Cd641Eca
   balanceAirdrop: 502664,
   totalDailyCheckPoint: 0,
   checkpointDeduction: 0, // checkPointBalanceAirdropDeduction
