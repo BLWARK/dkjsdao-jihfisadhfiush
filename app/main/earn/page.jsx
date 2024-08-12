@@ -167,7 +167,7 @@ const Page = () => {
           style={{ left: trail.x, top: trail.y }}
         ></div>
       ))}
-      <div className="wrap-farm w-full px-4 flex flex-col justify-center items-center ">
+      <div className="wrap-farm w-full px-4 flex flex-col justify-center items-center mt-5 ">
         <div className="top-sec w-full flex justify-between items-center ">
           <div className="top-user w-[50%] flex items-center justify-start gap-2">
             <button className="gap-2 px-2 flex flex-col justify-start items-start ">

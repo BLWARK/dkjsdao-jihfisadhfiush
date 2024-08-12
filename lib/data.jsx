@@ -181,8 +181,9 @@ export const dataNFT = [
       {
         id: "1",
         name: "Thunder Warden",
+        nftContract: "0xb7eb66D47062456E58f368c13EeA1C3a0cdfC990",
         description: "",
-        tokenId: "",
+        tokenId: "8",
         image: "/thunderwarden.png",
         traits: [
           {
@@ -197,8 +198,9 @@ export const dataNFT = [
       {
         id: "2",
         name: "Empress Valor",
+        nftContract: "0xb7eb66D47062456E58f368c13EeA1C3a0cdfC990",
         description: "",
-        tokenId: "",
+        tokenId: "8",
         image: "/empressvalor.png",
         traits: [
           {
@@ -212,8 +214,9 @@ export const dataNFT = [
       {
         id: "3",
         name: "Athena Valkyrie",
+        nftContract: "0xb7eb66D47062456E58f368c13EeA1C3a0cdfC990",
         description: "",
-        tokenId: "",
+        tokenId: "8",
         image: "/athenavalkyrie.png",
         traits: [
           {
@@ -227,8 +230,9 @@ export const dataNFT = [
       {
         id: "4",
         name: "Titan",
+        nftContract: "0xb7eb66D47062456E58f368c13EeA1C3a0cdfC990",
         description: "",
-        tokenId: "",
+        tokenId: "8",
         image: "/titan.png",
         traits: [
           {
@@ -242,8 +246,9 @@ export const dataNFT = [
       {
         id: "5",
         name: "Guardian",
+        nftContract: "0xb7eb66D47062456E58f368c13EeA1C3a0cdfC990",
         description: "",
-        tokenId: "",
+        tokenId: "8",
         image: "/guardian.png",
         traits: [
           {
@@ -257,8 +262,9 @@ export const dataNFT = [
       {
         id: "6",
         name: "Golden",
+        nftContract: "0xb7eb66D47062456E58f368c13EeA1C3a0cdfC990",
         description: "",
-        tokenId: "",
+        tokenId: "8",
         image: "/golden.png",
         traits: [
           {
@@ -272,8 +278,9 @@ export const dataNFT = [
       {
         id: "7",
         name: "Squeaky",
+        nftContract: "0xb7eb66D47062456E58f368c13EeA1C3a0cdfC990",
         description: "",
-        tokenId: "",
+        tokenId: "8",
         image: "/squeaky.png",
         traits: [
           {
@@ -287,8 +294,9 @@ export const dataNFT = [
       {
         id: "8",
         name: "Golden Warrior",
+        nftContract: "0xb7eb66D47062456E58f368c13EeA1C3a0cdfC990",
         description: "",
-        tokenId: "",
+        tokenId: "8",
         reward: 6123.33,
         image: "/goldenwarrior.png",
         traits: [
@@ -303,8 +311,9 @@ export const dataNFT = [
       {
         id: "9",
         name: "Blade",
+        nftContract: "0xb7eb66D47062456E58f368c13EeA1C3a0cdfC990",
         description: "",
-        tokenId: "",
+        tokenId: "8",
         image: "/bladeguardian.png",
         traits: [
           {
@@ -318,8 +327,9 @@ export const dataNFT = [
       {
         id: "10",
         name: "King Aegis",
+        nftContract: "0xb7eb66D47062456E58f368c13EeA1C3a0cdfC990",
         description: "",
-        tokenId: "",
+        tokenId: "8",
         image: "/kingaegis.png",
         traits: [
           {
