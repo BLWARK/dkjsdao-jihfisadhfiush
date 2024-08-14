@@ -91,6 +91,7 @@ export const BackProvider = ({ children }) => {
   const claimPoint = async () => {
     try{
       const res = await customPost('/api/v1/claim')
+      console.log(res)
       setClaim(res);
     } catch (error) {
       console.log(error);
