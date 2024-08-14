@@ -6,26 +6,28 @@ import Image from "next/image";
 import { IoWallet, IoTimer } from "react-icons/io5";
 import { MdClose, MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { useGlobalState } from "@/context/GlobalStateContext";
-import { dataUser } from "@/lib/data";
+import { useBackend } from "@/context/BackContext";
 import CoinImage from "@/public/Coins1.png";
 
 const Page = () => {
   const {
     balance,
     setBalance,
-    balanceAirdrop,
-    setBalanceAirdrop,
     timer,
     setTimer,
-    canClaim,
-    setCanClaim,
     claimableCoins,
     setClaimableCoins,
-    userLevel,
-    perSecondEarn,
     levelImage,
     nftRewardBonus,
   } = useGlobalState();
+
+  const {
+    dataMe, 
+    getMe,
+    dataPlay, 
+    play,
+    claimPoint,
+  } = useBackend();
 
   const [floatingNumbers, setFloatingNumbers] = useState([]);
   const [coinClicked, setCoinClicked] = useState(false);
@@ -34,19 +36,55 @@ const Page = () => {
   const [lastClickTime, setLastClickTime] = useState(0);
   const [clickDelay, setClickDelay] = useState(false);
   const [showConnectWalletPopup, setShowConnectWalletPopup] = useState(false);
-  const [walletAddress, setWalletAddress] = useState(dataUser.walletAddress || '');
 
-  const handleClaim = () => {
+  useEffect(() => {
+    getMe();
+  }, []);
+
+  useEffect(() => {
+    play();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (timer > 0) {
+        setTimer((prevTimer) => prevTimer - 1);
+
+        // Update coin pertumbuhan setiap detik
+        const valueToAdd = dataPlay?.perSecondEarn || 0;
+        setClaimableCoins((prev) => prev + valueToAdd);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timer, dataPlay, setTimer, setClaimableCoins]);
+
+  // Menghitung apakah pengguna bisa klaim berdasarkan unclaimedPoints dari API backend
+  const canClaim = claimableCoins > 0;
+
+  const handleClaim = async () => {
     if (canClaim) {
       setIsLoading(true);
-      setTimeout(() => {
-        setBalance((prev) => prev + claimableCoins);
-        setBalanceAirdrop((prev) => prev + claimableCoins);
-        setClaimableCoins(0);
-        setTimer(3600);
-        setCanClaim(false);
-        setIsLoading(false);
-      }, 2000);
+
+      // Panggil API claim dari backend
+      const claimData = await claimPoint();
+
+      if (claimData) {
+        // Update balance dan dataMe.points dengan earnedPoints dari respons API
+        setBalance((prev) => prev + claimData.earnedPoints);
+
+        // Update dataMe.points (alias balanceAirdrop) dengan earnedPoints
+        dataMe.points += claimData.earnedPoints;
+
+        // Reset claimable coins dan timer setelah klaim
+        setClaimableCoins(0); 
+        setTimer(3600); 
+
+        // Panggil play lagi untuk memulai sesi baru
+        await play(); 
+      }
+
+      setIsLoading(false);
     }
   };
 
@@ -60,10 +98,10 @@ const Page = () => {
     setLastClickTime(currentTime);
 
     if (claimableCoins > 0) {
-      const valueToAdd = perSecondEarn;
+      const valueToAdd = dataPlay?.perSecondEarn || 0; // Menggunakan dataPlay.perSecondEarn dari API
       setBalance((prev) => prev + valueToAdd);
-      setBalanceAirdrop((prev) => prev + valueToAdd);
-      setTimer((prev) => prev + 1); // Tambahkan 1 detik ke timer setiap kali gambar diklik
+      dataMe.points += valueToAdd; // Update points di dataMe sesuai dengan perSecondEarn
+
       setClaimableCoins((prev) => {
         const newClaimableCoins = prev - valueToAdd;
         if (newClaimableCoins <= 0) {
@@ -120,35 +158,6 @@ const Page = () => {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleConnectWalletClick = () => {
-    if (!walletAddress) {
-      setShowConnectWalletPopup(true);
-    }
-  };
-
-  const handleCloseConnectWalletPopup = () => {
-    setShowConnectWalletPopup(false);
-    setWalletAddress('');
-  };
-
-  const handleWalletAddressChange = (event) => {
-    setWalletAddress(event.target.value);
-  };
-
-  const handleConnectWallet = () => {
-    if (walletAddress) {
-      dataUser.walletAddress = walletAddress; // Simpan alamat wallet ke dataUser
-      handleCloseConnectWalletPopup();
-    }
-  };
-
-  const formatWalletAddress = (address) => {
-    if (address.length > 9) {
-      return `${address.slice(0, 6)}...${address.slice(-4)}`;
-    }
-    return address;
-  };
-
   return (
     <div className="earn-sec bgs w-full flex flex-col justify-start items-center min-h-screen overflow-y-scroll relative my-5">
       {floatingNumbers.map((num) => (
@@ -171,32 +180,31 @@ const Page = () => {
         <div className="top-sec w-full flex justify-between items-center ">
           <div className="top-user w-[50%] flex items-center justify-start gap-2">
             <button className="gap-2 px-2 flex flex-col justify-start items-start ">
-              <p className=" text-[12px] font-bold">Hi, {dataUser ? dataUser?.userName_Telegram : 'Loading...'}</p>
+              <p className=" text-[12px] font-bold">Hi, {dataMe ? dataMe?.username : "loading"}</p>
               <Link href="/main/level" className="flex justify-center items-center text-blue-400 ">
-              
-              <p className=" text-[12px] font-bold "><span className="text-[12px] font-light text-gray-400">Level: </span>{userLevel} </p>
-              <MdOutlineKeyboardArrowRight />
+                <p className=" text-[12px] font-bold "><span className="text-[12px] font-light text-gray-400">Level: </span>{dataPlay?.levelName} </p>
+                <MdOutlineKeyboardArrowRight />
               </Link>
             </button>
           </div>
           <div className="top-user w-[50%] flex items-center justify-end gap-2">
             <button 
-              className={`gap-2 but p-4 flex justify-center items-center rounded-xl ${walletAddress ? 'Disable' : ''}`} 
-              onClick={handleConnectWalletClick}
-              disabled={!!walletAddress}
+              className="gap-2 but p-4 flex justify-center items-center rounded-xl" 
+              // onClick={handleConnectWalletClick}
+              // disabled={!!walletAddress}
             >
               <IoWallet />
-              <p className=" text-[12px] ">{walletAddress ? formatWalletAddress(walletAddress) : 'Connect Wallet'}</p>
+              <p className=" text-[12px] ">walletAddress</p>
             </button>
           </div>
         </div>
        
         <div className="level-sec w-full grid grid-cols-2 justify-between items-center mt-4 gap-4">
-          <div className="balance bgs  flex flex-col justify-start items-start px-4 py-3 rounded-xl gap-2">
+          <div className="balance bgs  flex flex-col justify-start items-start px=4 py-3 rounded-xl gap-2">
             <p className="font-light text-[10px] text-gray-400">Profit per hour </p>
             <div className="wrap-level w-full  flex justify-between items-center">
               <div className="wrap-icon-coin w-full flex justify-start items-start gap-2">
-                <p className="text-white text-[12px] font-bold">{(perSecondEarn * 3600).toFixed(2)}</p>
+                <p className="text-white text-[12px] font-bold">{(dataPlay?.perSecondEarn * 3600).toFixed(2)}</p>
               </div>
             </div>
           </div>
@@ -213,7 +221,7 @@ const Page = () => {
           <div className="wrap-total-balance w-full flex justify-between items-center">
             <div className="wrap-icon-coin w-full flex justify-center items-center gap-2">
               <Image src="/Coins.png" alt="Logo" loading="lazy" width={30} height={30} />
-              <p className="font-bold text-[28px] text-white text-right">{balanceAirdrop.toLocaleString('en-US', { maximumFractionDigits: 4 })}</p>
+              <p className="font-bold text-[28px] text-white text-right">{dataMe?.points.toLocaleString('en-US', { maximumFractionDigits: 4 })}</p>
             </div>
           </div>
         </div>
@@ -221,7 +229,7 @@ const Page = () => {
           <div className="coin-sec w-full flex flex-col justify-center items-center -mt-3">
             <div className="coins1 mt-8"></div>
             <Image
-              src={levelImage}
+              src={`/${dataMe?.level}.png`}
               alt="Level Image"
               width={240}
               height={240}
@@ -242,7 +250,7 @@ const Page = () => {
             {isLoading ? (
               <div className="loader"></div>
             ) : (
-              <p>Claim {(claimableCoins).toLocaleString('en-US', { maximumFractionDigits: 6 })}</p>
+              <p>Claim {claimableCoins.toLocaleString('en-US', { maximumFractionDigits: 6 })}</p>
             )}
           </div>
         </button>
@@ -260,7 +268,7 @@ const Page = () => {
         </div>
       </div>
 
-      {showConnectWalletPopup && (
+      {/* {showConnectWalletPopup && (
         <div className="popup fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80 ">
           <div className="popup-content bgs w-[350px] h-[360px] rounded-lg shadow-lg text-center flex flex-col p-3 gap-2 relative">
             <button className="close-icon absolute top-4 right-4 text-white text-2xl" onClick={handleCloseConnectWalletPopup}>
@@ -285,7 +293,7 @@ const Page = () => {
             </button>
           </div>
         </div>
-      )}
+      )} */}
       <div className="py-3"></div>
     </div>
   );

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { GlobalStateProvider } from "@/context/GlobalStateContext"; // Sesuaikan dengan path yang benar
-// import { ContextProvider } from "@/context"
+import Script from "next/script";
+import { BackProvider } from "@/context/BackContext"
 // import { cookieToInitialState } from "wagmi";
 // import {headers} from "next/headers"
 // import { config } from "@/config";
@@ -22,14 +23,17 @@ export default function RootLayout({
   // const initialState = cookieToInitialState(config, headers().get("cookie"))
   return (
     <html lang="en">
+      <head>
+        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
+      </head>
       <body className={inter.className}>
-        {/* <ContextProvider initialState={initialState}> */}
+        <BackProvider>
         <GlobalStateProvider>
           <div className="w-full h-min-screen  mx-auto flex justify-center items-center ">
             {children}
           </div>
         </GlobalStateProvider>
-        {/* </ContextProvider> */}
+        </BackProvider>
       </body>
     </html>
   );

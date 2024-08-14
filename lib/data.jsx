@@ -25,21 +25,21 @@ export const dataUser = {
 
   // Data kepemilikan NFT
   nfts: [
-    {
-      id: "1",
-      name: "Thunder Warden",
-      description: "",
-      tokenId: "",
-      image: "/thunderwarden.png",
-      traits: [
-        {
-          reward: 1484.44,
-        },
-        { 
-          rarity: "R",
-        }
-      ]
-     },
+    // {
+    //   id: "1",
+    //   name: "Thunder Warden",
+    //   description: "",
+    //   tokenId: "",
+    //   image: "/thunderwarden.png",
+    //   traits: [
+    //     {
+    //       reward: 1484.44,
+    //     },
+    //     { 
+    //       rarity: "R",
+    //     }
+    //   ]
+    //  },
     // {
     //   id: "2",
     //   name: "Empress Valor",
