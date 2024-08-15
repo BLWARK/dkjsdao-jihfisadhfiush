@@ -1,56 +1,35 @@
 "use client";
-
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { IoWallet, IoTimer } from "react-icons/io5";
-import { MdClose, MdOutlineKeyboardArrowRight } from "react-icons/md";
+import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { useGlobalState } from "@/context/GlobalStateContext";
-import { dataUser } from "@/lib/data";
+import { useBackend } from "@/context/BackContext";
 import CoinImage from "@/public/Coins1.png";
-import { useBackend } from "@/context/BackContext"
 
 const Page = () => {
   const {
     balance,
     setBalance,
-    balanceAirdrop,
-    setBalanceAirdrop,
-    timer,
-    setTimer,
     canClaim,
     setCanClaim,
     claimableCoins,
-    setClaimableCoins,
-    userLevel,
-    perSecondEarn,
+    timer,
+    setTimer,
     levelImage,
     nftRewardBonus,
   } = useGlobalState();
 
   const {
-    dataMe, 
+    dataMe,
     getMe,
-    dataPlay, 
+    dataPlay,
     play,
     claimPoint,
     claim,
+    click,
   } = useBackend();
-
-  
-  useEffect(() => {
-    getMe();
-    
-  }, []);
-  console.log(dataMe)
-
-  useEffect(() => {
-    play();
-
-  }, []);
-  console.log(dataPlay)
-
-  
 
   const [floatingNumbers, setFloatingNumbers] = useState([]);
   const [coinClicked, setCoinClicked] = useState(false);
@@ -58,16 +37,68 @@ const Page = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastClickTime, setLastClickTime] = useState(0);
   const [clickDelay, setClickDelay] = useState(false);
-  const [showConnectWalletPopup, setShowConnectWalletPopup] = useState(false);
-  const [walletAddress, setWalletAddress] = useState(dataUser.walletAddress || '');
+  const [unclaimedPoints, setUnclaimedPoints] = useState(0); // State untuk unclaimedPoints
+  const [isClaimDisabled, setIsClaimDisabled] = useState(false); // State untuk menonaktifkan tombol Claim
 
-  const handleClaim = () => {
-    if (canClaim) {
+  useEffect(() => {
+    getMe();
+    play();
+  }, []);
+
+  useEffect(() => {
+    setUnclaimedPoints(dataPlay?.unclaimedPoints || 0); // Initialize unclaimedPoints dari backend
+
+    const interval = setInterval(() => {
+      if (timer > 0) {
+        setTimer((prevTimer) => prevTimer - 1);
+
+        const valueToAdd = dataPlay?.perSecondEarn || 0;
+        setUnclaimedPoints((prev) => prev + valueToAdd); // Update unclaimedPoints secara berkala
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timer, dataPlay, setTimer]);
+
+  // const handleClaim = async () => {
+  //   if (unclaimedPoints > 0) {
+  //     setIsLoading(true);
+  //     setIsClaimDisabled(true); // Menonaktifkan tombol Claim
+
+  //     const claimData = await claimPoint();
+
+  //     if (claimData) {
+  //       setBalance((prev) => prev + claimData.earnedPoints);
+  //       dataMe.points += claimData.earnedPoints;
+
+  //       await play(); // Memulai sesi baru setelah klaim
+
+  //       setTimer(3600); // Reset timer setelah klaim
+  //       setUnclaimedPoints(0); // Reset unclaimedPoints setelah klaim
+  //     }
+
+  //     setIsLoading(false);
+
+  //     // Mengaktifkan kembali tombol Claim setelah 5 detik
+  //     setTimeout(() => {
+  //       setIsClaimDisabled(false);
+
+
+
+  //     }, 10000);
+  //   }
+  // };
+
+  const handleClaim = async () => {
+    if (claimPoint) {
       setIsLoading(true);
+      const claimData = await claimPoint();
+
+
       setTimeout(() => {
-        setBalance((prev) => prev + claimableCoins);
-        setBalanceAirdrop((prev) => prev + claimableCoins);
-        setClaimableCoins(0);
+        getMe((prev) => prev + claimData.earnedPoints);
+        getMe((prev) => prev + claimData.earnedPoints);
+        play(0);
         setTimer(3600);
         setCanClaim(false);
         setIsLoading(false);
@@ -75,8 +106,8 @@ const Page = () => {
     }
   };
 
-  const handleClick = (event) => {
-    if (clickDelay || claimableCoins <= 0) return;
+  const handleClick = async (event) => {
+    if (clickDelay || unclaimedPoints <= 0) return;
 
     const currentTime = Date.now();
     if (currentTime - lastClickTime < 10) {
@@ -84,21 +115,12 @@ const Page = () => {
     }
     setLastClickTime(currentTime);
 
-    if (claimableCoins > 0) {
-      const valueToAdd = perSecondEarn;
+    if (unclaimedPoints > 0) {
+      const valueToAdd = dataPlay?.perSecondEarn || 0;
       setBalance((prev) => prev + valueToAdd);
-      setBalanceAirdrop((prev) => prev + valueToAdd);
-      setTimer((prev) => prev + 1); // Tambahkan 1 detik ke timer setiap kali gambar diklik
-      setClaimableCoins((prev) => {
-        const newClaimableCoins = prev - valueToAdd;
-        if (newClaimableCoins <= 0) {
-          setClickDelay(true);
-          setTimeout(() => {
-            setClickDelay(false);
-          }, 5000);
-        }
-        return newClaimableCoins < 0 ? 0 : newClaimableCoins;
-      });
+      dataMe.points += valueToAdd;
+
+      setTimer((prev) => prev + 1);
 
       const { clientX, clientY } = event;
 
@@ -135,6 +157,19 @@ const Page = () => {
           prev.filter((trail) => trail.id !== id)
         );
       }, 2000);
+
+      const sessionData = await click();
+      if (sessionData) {
+        setTimer(3600 - sessionData.elapsedTimeInSeconds);
+        setBalance((prev) => prev + sessionData.unclaimedPoints);
+        dataMe.points = sessionData.unclaimedPoints;
+
+        setUnclaimedPoints(sessionData.unclaimedPoints); // Update unclaimedPoints setelah click
+
+        if (sessionData.perSecondEarn) {
+          dataPlay.perSecondEarn = sessionData.perSecondEarn;
+        }
+      }
     }
   };
 
@@ -143,35 +178,6 @@ const Page = () => {
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const handleConnectWalletClick = () => {
-    if (!walletAddress) {
-      setShowConnectWalletPopup(true);
-    }
-  };
-
-  const handleCloseConnectWalletPopup = () => {
-    setShowConnectWalletPopup(false);
-    setWalletAddress('');
-  };
-
-  const handleWalletAddressChange = (event) => {
-    setWalletAddress(event.target.value);
-  };
-
-  const handleConnectWallet = () => {
-    if (walletAddress) {
-      dataUser.walletAddress = walletAddress; // Simpan alamat wallet ke dataUser
-      handleCloseConnectWalletPopup();
-    }
-  };
-
-  const formatWalletAddress = (address) => {
-    if (address.length > 9) {
-      return `${address.slice(0, 6)}...${address.slice(-4)}`;
-    }
-    return address;
   };
 
   return (
@@ -198,20 +204,17 @@ const Page = () => {
             <button className="gap-2 px-2 flex flex-col justify-start items-start ">
               <p className=" text-[12px] font-bold">Hi, {dataMe ? dataMe?.username : "loading"}</p>
               <Link href="/main/level" className="flex justify-center items-center text-blue-400 ">
-              
-              <p className=" text-[12px] font-bold "><span className="text-[12px] font-light text-gray-400">Level: </span>{dataPlay?.levelName} </p>
-              <MdOutlineKeyboardArrowRight />
+                <p className=" text-[12px] font-bold "><span className="text-[12px] font-light text-gray-400">Level: </span>{dataPlay?.levelName} </p>
+                <MdOutlineKeyboardArrowRight />
               </Link>
             </button>
           </div>
           <div className="top-user w-[50%] flex items-center justify-end gap-2">
             <button 
-              className={`gap-2 but p-4 flex justify-center items-center rounded-xl ${walletAddress ? 'Disable' : ''}`} 
-              onClick={handleConnectWalletClick}
-              disabled={!!walletAddress}
+              className="gap-2 but p-4 flex justify-center items-center rounded-xl" 
             >
               <IoWallet />
-              <p className=" text-[12px] ">{walletAddress ? formatWalletAddress(walletAddress) : 'Connect Wallet'}</p>
+              <p className=" text-[12px] ">walletAddress</p>
             </button>
           </div>
         </div>
@@ -221,7 +224,7 @@ const Page = () => {
             <p className="font-light text-[10px] text-gray-400">Profit per hour </p>
             <div className="wrap-level w-full  flex justify-between items-center">
               <div className="wrap-icon-coin w-full flex justify-start items-start gap-2">
-                <p className="text-white text-[12px] font-bold">{(dataPlay?.perSecondEarn * 3600).toFixed(2)}</p>
+                <p className="text-white text-[12px] font-bold">{(dataPlay?.perHourEarn)}</p>
               </div>
             </div>
           </div>
@@ -229,7 +232,7 @@ const Page = () => {
             <p className="font-light text-[10px] text-gray-400">NFT Reward Bonus </p>
             <div className="wrap-level w-full  flex justify-between items-center">
               <div className="wrap-icon-oin w-full flex justify-start items-start gap-2">
-                <p className="text-white text-[12px] font-bold">{nftRewardBonus.toLocaleString('en-US', { maximumFractionDigits: 4 })}</p>
+                <p className="text-white text-[12px] font-bold">{nftRewardBonus.toLocaleString('en-US', { maximumFractionDigits: 2 })}</p>
               </div>
             </div>
           </div>
@@ -238,7 +241,7 @@ const Page = () => {
           <div className="wrap-total-balance w-full flex justify-between items-center">
             <div className="wrap-icon-coin w-full flex justify-center items-center gap-2">
               <Image src="/Coins.png" alt="Logo" loading="lazy" width={30} height={30} />
-              <p className="font-bold text-[28px] text-white text-right">{dataMe?.points.toLocaleString('en-US', { maximumFractionDigits: 4 })}</p>
+              <p className="font-bold text-[28px] text-white text-right">{dataMe?.points.toLocaleString('en-US', { maximumFractionDigits: 0 })}</p>
             </div>
           </div>
         </div>
@@ -255,9 +258,9 @@ const Page = () => {
           </div>
         </div>
         <button
-          className={`w-[330px] h-[55px]  rounded-xl flex justify-center items-center mt-10 ${canClaim ? 'but' : 'bg-gray-500 cursor-not-allowed'}`}
+          className={`w-[330px] h-[55px]  rounded-xl flex justify-center items-center mt-10 ${isClaimDisabled || unclaimedPoints <= 0 ? 'bg-gray-400 cursor-not-allowed' : 'but'}`}
           onClick={handleClaim}
-          disabled={!canClaim || isLoading}
+          disabled={ isLoading || !canClaim}
         >
           <div className="timer w-[15%] h-[55px] rounded-l-xl but flex flex-col justify-center items-center">
             <IoTimer />
@@ -284,33 +287,6 @@ const Page = () => {
           </div>
         </div>
       </div>
-
-      {showConnectWalletPopup && (
-        <div className="popup fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80 ">
-          <div className="popup-content bgs w-[350px] h-[360px] rounded-lg shadow-lg text-center flex flex-col p-3 gap-2 relative">
-            <button className="close-icon absolute top-4 right-4 text-white text-2xl" onClick={handleCloseConnectWalletPopup}>
-              <MdClose />
-            </button>
-            <p className="mb-4 text-white font-bold text-lg mt-5">Connect Your Wallet</p>
-            <input
-              type="text"
-              placeholder="Enter your wallet address"
-              value={walletAddress}
-              onChange={handleWalletAddressChange}
-              className="bg-blue-950 w-[330px] h-[70px] p-5 rounded-lg text-[12px] mb-4"
-            />
-            <p className='text-xs italic text-red-500 font-extrabold'>Please enter your wallet address (BEP20) correctly, <span className='text-xs italic text-white font-light'>your reward will send in your wallet address, We will not be responsible if the wallet you entered is incorrect</span>
-            </p>
-            <button
-              onClick={handleConnectWallet}
-              className={`but p-4 rounded-lg mt-8 ${!walletAddress ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={!walletAddress}
-            >
-              Connect
-            </button>
-          </div>
-        </div>
-      )}
       <div className="py-3"></div>
     </div>
   );
