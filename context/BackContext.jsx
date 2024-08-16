@@ -77,9 +77,12 @@ export const BackProvider = ({ children }) => {
     }
   }
 
-  const click = async () => {
+  const click = async ( dataCount ) => {
+    const clickCount = {
+      clickCount: dataCount?.clickCount,
+    };
     try{
-      const res = await customPost('/api/v1/click-coin')
+      const res = await customPost('/api/v1/click-coin',  clickCount)
       console.log(res)
       setClickCoin(res);
     } catch (error) {

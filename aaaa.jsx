@@ -10,22 +10,13 @@ import CoinImage from "@/public/Coins1.png";
 
 const Page = () => {
   const {
-    balance,
     setBalance,
-    balanceAirdrop,
     setBalanceAirdrop,
-    timer,
-    setTimer,
     canClaim,
     setCanClaim,
-    claimableCoins,
-    setClaimableCoins,
-    userLevel,
-    setUserLevel,
-    perSecondEarn,
-    setPerSecondEarn,
-    levelImage,
-    setLevelImage,
+    claimableCoins,  
+    timer,
+    setTimer,
     nftRewardBonus,
   } = useGlobalState();
 
@@ -46,35 +37,19 @@ const Page = () => {
   const [lastClickTime, setLastClickTime] = useState(0);
   const [clickDelay, setClickDelay] = useState(false);
   const [unclaimedPoints, setUnclaimedPoints] = useState(0); // State untuk unclaimedPoints
-  const [isClickDisabled, setIsClickDisabled] = useState(false);
   const [isClaimDisabled, setIsClaimDisabled] = useState(false); // State untuk menonaktifkan tombol Claim
   const [clickCount, setClickCount] = useState(0); // Tambahkan ini di bagian atas komponen
 
   const playCalled = useRef(false);
 
   useEffect(() => {
-    const initializeData = async () => {
-      await getMe();
-      if (dataMe) {
-       
-        setBalanceAirdrop(dataMe.points); // Use balanceAirdrop from backend
-        
-        
-      }
-
-      await play();
-      if (dataPlay) {
-        setClaimableCoins(dataPlay.unclaimedPoints);
-        setPerSecondEarn(dataPlay.perSecondEarn);
-        setTimer(3600 - dataPlay.elapsedTimeInSeconds); // Sync timer with backend
-      }
-    };
-
+    getMe();
+    
     if (!playCalled.current) {
-      initializeData();
-      playCalled.current = true;
+      play(); // Memanggil API play hanya sekali
+      playCalled.current = true; // Menandai bahwa API play sudah dipanggil
     }
-  }, []); // Run this effect only onceggil sekali saat komponen pertama kali dimuat
+  }, []); // Efek ini hanya dipanggil sekali saat komponen pertama kali dimuat
 
 
   useEffect(() => {
@@ -99,6 +74,8 @@ const Page = () => {
   
   
 
+
+  
   useEffect(() => {
     if (dataPlay) {
       setCanClaim(true);
@@ -130,14 +107,6 @@ const Page = () => {
       setIsLoading(true);
       setCanClaim(false);  // Nonaktifkan tombol segera
   
-      // Pastikan unclaimedPoints tidak negatif
-      if (unclaimedPoints <= 0) {
-        console.warn('No points to claim.');
-        setIsLoading(false);
-        setCanClaim(true); // Aktifkan kembali tombol jika tidak ada poin
-        return;
-      }
-  
       const claimResponse = await claimPoint();  // Memanggil API claim
       console.log('Claim Response:', claimResponse);  // Logging hasil respons dari claimPoint
   
@@ -149,10 +118,8 @@ const Page = () => {
       // Reset timer ke 1 jam (3600 detik) dan sinkronkan dengan elapsed time dari API
       setTimer(3600 - elapsedTimeInSeconds);
   
-      // Reset unclaimedPoints setelah klaim
-      setUnclaimedPoints(0);  // Set point ke 0 saat menunggu claim berikutnya
-  
       setIsLoading(false);
+      setUnclaimedPoints(0);  // Set point ke 0 saat menunggu claim berikutnya
   
       // Nonaktifkan tombol selama 5 detik setelah loading selesai
       setTimeout(() => {
@@ -167,7 +134,6 @@ const Page = () => {
   
   
   
-  
   useEffect(() => {
     if (dataMe) {
       
@@ -175,58 +141,150 @@ const Page = () => {
     }
   }, [dataMe]);
 
-  const handleClick = (event) => {
-    if (isClickDisabled) return; // Periksa jika klik sedang dinonaktifkan
-  
+  const handleClick = async (event) => {
+    if (claimableCoins <= 0) return;
+
     const currentTime = Date.now();
-    if (currentTime - lastClickTime < 10) return;
-    setLastClickTime(currentTime);
-  
-    if (unclaimedPoints > 0) {
-      const valueToAdd = Math.min(unclaimedPoints, perSecondEarn);  // Pastikan tidak melebihi unclaimedPoints
-      setBalance((prev) => prev + valueToAdd); 
-      setBalanceAirdrop((prev) => prev + valueToAdd); 
-      setUnclaimedPoints((prev) => Math.max(prev - valueToAdd, 0));  // Pastikan unclaimedPoints tidak negatif
-      setTimer((prev) => Math.min(prev + 1, 3600));
-  
-      setClaimableCoins((prev) => prev + valueToAdd);
-  
-      const { clientX, clientY } = event;
-      const id = Date.now();
-      setFloatingNumbers((prev) => [
-        ...prev,
-        { id, value: valueToAdd.toFixed(6), x: clientX, y: clientY },
-      ]);
-      setTapTrails((prev) => [...prev, { id, x: clientX, y: clientY }]);
-      setCoinClicked(true);
-      setTimeout(() => setCoinClicked(false), 50);
-  
-      setTimeout(() => {
-        setFloatingNumbers((prev) => prev.filter((num) => num.id !== id));
-        setTapTrails((prev) => prev.filter((trail) => trail.id !== id));
-      }, 2000);
-  
-      clearTimeout(clickDelay); 
-      const newDelay = setTimeout(async () => {
-        try {
-          await click({ clickCount: 1 }); 
-          
-        } catch (error) {
-          console.error("Error during click:", error);
-        }
-      }, 2000);
-      setClickDelay(newDelay); 
-    } else {
-      // Nonaktifkan klik selama 3 detik jika unclaimedPoints = 0
-      setIsClickDisabled(true);
-      setTimeout(() => {
-        setIsClickDisabled(false); // Aktifkan kembali klik setelah 3 detik
-      }, 3000);
+    if (currentTime - lastClickTime < 10) {
+      return;
     }
-  };
+    setLastClickTime(currentTime);
+
+    // Update poin di UI terlebih dahulu
+    const valueToAdd = dataPlay?.perSecondEarn || 0;
+    setBalance((prev) => prev + valueToAdd);
+    setBalanceAirdrop((prev) => prev + valueToAdd);
+    setUnclaimedPoints((prev) => prev - valueToAdd); // Kurangi unclaimedPoints sesuai dengan nilai perSecondEarn
+    setTimer((prev) => prev + 1); // Tambahkan 1 detik ke timer setiap kali gambar diklik
+
+    // Animasi floating number untuk UI
+    const { clientX, clientY } = event;
+    const id = Date.now();
+    setFloatingNumbers((prev) => [
+      ...prev,
+      {
+        id,
+        value: valueToAdd.toFixed(6),
+        x: clientX,
+        y: clientY,
+      },
+    ]);
+
+    setTapTrails((prev) => [
+      ...prev,
+      {
+        id,
+        x: clientX,
+        y: clientY,
+      },
+    ]);
+
+    setCoinClicked(true);
+    setTimeout(() => {
+      setCoinClicked(false);
+    }, 50);
+
+    setTimeout(() => {
+      setFloatingNumbers((prev) =>
+        prev.filter((num) => num.id !== id)
+      );
+      setTapTrails((prev) =>
+        prev.filter((trail) => trail.id !== id)
+      );
+    }, 2000);
+
+    // Update clickCount dan hit API click-coin setelah 5 kali klik
+    setClickCount((prevCount) => {
+      const newCount = prevCount + 1;
+      if (newCount >= 5) {
+        // Hit API click-coin dan perbarui data 
+        click()
+          .then((res) => {
+            console.log("API Click Response:", res); // Lihat respons dari API click-coin
+            if (res?.points) {
+              
+              setBalanceAirdrop(res.points); // Perbarui balance airdrop dari respons API
+              setUnclaimedPoints(res.unclaimedPoints); // Perbarui unclaimedPoints dari respons API
+            }
+          })
+          .catch((error) => {
+            console.error("Error in API Click:", error);  // Penanganan kesalahan pada API click-coin
+          });
+        return 0;  // Reset click count setelah API click-coin dipanggil
+      }
+      return newCount;
+    });
+};
+
+
+
   
   
 
+  // const handleClick = (event) => {
+  //   if (clickDelay || claimableCoins <= 0) return;
+
+  //   const currentTime = Date.now();
+  //   if (currentTime - lastClickTime < 10) {
+  //     return;
+  //   }
+  //   setLastClickTime(currentTime);
+
+  //   if (claimableCoins > 0) {
+  //     const valueToAdd = perSecondEarn;
+  //     setBalance((prev) => prev + valueToAdd);
+  //     setBalanceAirdrop((prev) => prev + valueToAdd);
+  //     setTimer((prev) => prev + 1); // Tambahkan 1 detik ke timer setiap kali gambar diklik
+  //     setClaimableCoins((prev) => {
+  //       const newClaimableCoins = prev - valueToAdd;
+  //       if (newClaimableCoins <= 0) {
+  //         setClickDelay(true);
+  //         setTimeout(() => {
+  //           setClickDelay(false);
+  //         }, 5000);
+  //       }
+  //       return newClaimableCoins < 0 ? 0 : newClaimableCoins;
+  //     });
+
+  //     const { clientX, clientY } = event;
+
+  //     const id = Date.now();
+  //     setFloatingNumbers((prev) => [
+  //       ...prev,
+  //       {
+  //         id,
+  //         value: valueToAdd.toFixed(6),
+  //         x: clientX,
+  //         y: clientY,
+  //       },
+  //     ]);
+
+  //     setTapTrails((prev) => [
+  //       ...prev,
+  //       {
+  //         id,
+  //         x: clientX,
+  //         y: clientY,
+  //       },
+  //     ]);
+
+  //     setCoinClicked(true);
+  //     setTimeout(() => {
+  //       setCoinClicked(false);
+  //     }, 50);
+
+  //     setTimeout(() => {
+  //       setFloatingNumbers((prev) =>
+  //         prev.filter((num) => num.id !== id)
+  //       );
+  //       setTapTrails((prev) =>
+  //         prev.filter((trail) => trail.id !== id)
+
+        
+  //       );
+  //     }, 2000);
+  //   }
+  // };
   const formatTime = (seconds) => {
     const secs = Math.floor(seconds); // Pastikan nilai detik adalah integer
     const hrs = Math.floor(secs / 3600);
@@ -298,7 +356,7 @@ const Page = () => {
           <div className="wrap-total-balance w-full flex justify-between items-center">
             <div className="wrap-icon-coin w-full flex justify-center items-center gap-2">
               <Image src="/Coins.png" alt="Logo" loading="lazy" width={30} height={30} />
-              <p className="font-bold text-[28px] text-white text-right">{balanceAirdrop.toLocaleString('en-US', { maximumFractionDigits: 2 })}</p>
+              <p className="font-bold text-[28px] text-white text-right">{dataMe?.points.toLocaleString('en-US', { maximumFractionDigits: 0 })}</p>
             </div>
           </div>
         </div>

@@ -5,10 +5,23 @@ import Image from "next/image";
 import { IoMdPersonAdd } from "react-icons/io";
 import { IoCopyOutline } from "react-icons/io5";
 import { dataReferral } from "@/lib/data"; // Import data referral
+import { useBackend } from "@/context/BackContext";
 
 const Page = () => {
   const [animate, setAnimate] = useState(false);
   const [referrals, setReferrals] = useState(dataReferral[0].referrals); // Mengambil data referral dari lib/data.js
+
+
+  const {
+    dataMe,
+    getMe,
+  } = useBackend();
+
+  useEffect(() => {
+    getMe();
+
+  }, []);
+
 
   useEffect(() => {
     const interval = setInterval(() => {
