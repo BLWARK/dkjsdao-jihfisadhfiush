@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { IoWallet, IoTimer } from "react-icons/io5";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
@@ -12,9 +12,12 @@ const Page = () => {
   const {
     balance,
     setBalance,
+    balanceAirdrop,
+    setBalanceAirdrop,
     canClaim,
     setCanClaim,
     claimableCoins,
+    setClaimableCoins,
     timer,
     setTimer,
     levelImage,
@@ -39,75 +42,78 @@ const Page = () => {
   const [clickDelay, setClickDelay] = useState(false);
   const [unclaimedPoints, setUnclaimedPoints] = useState(0); // State untuk unclaimedPoints
   const [isClaimDisabled, setIsClaimDisabled] = useState(false); // State untuk menonaktifkan tombol Claim
+  const playCalled = useRef(false);
 
   useEffect(() => {
     getMe();
-    play();
-  }, []);
+    
+    if (!playCalled.current) {
+      play(); // Memanggil API play hanya sekali
+      playCalled.current = true; // Menandai bahwa API play sudah dipanggil
+    }
+  }, []); // Efek ini hanya dipanggil sekali saat komponen pertama kali dimuat
+  
 
+
+  
   useEffect(() => {
-    setUnclaimedPoints(dataPlay?.unclaimedPoints || 0); // Initialize unclaimedPoints dari backend
-
-    const interval = setInterval(() => {
-      if (timer > 0) {
-        setTimer((prevTimer) => prevTimer - 1);
-
-        const valueToAdd = dataPlay?.perSecondEarn || 0;
-        setUnclaimedPoints((prev) => prev + valueToAdd); // Update unclaimedPoints secara berkala
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [timer, dataPlay, setTimer]);
-
-  // const handleClaim = async () => {
-  //   if (unclaimedPoints > 0) {
-  //     setIsLoading(true);
-  //     setIsClaimDisabled(true); // Menonaktifkan tombol Claim
-
-  //     const claimData = await claimPoint();
-
-  //     if (claimData) {
-  //       setBalance((prev) => prev + claimData.earnedPoints);
-  //       dataMe.points += claimData.earnedPoints;
-
-  //       await play(); // Memulai sesi baru setelah klaim
-
-  //       setTimer(3600); // Reset timer setelah klaim
-  //       setUnclaimedPoints(0); // Reset unclaimedPoints setelah klaim
-  //     }
-
-  //     setIsLoading(false);
-
-  //     // Mengaktifkan kembali tombol Claim setelah 5 detik
-  //     setTimeout(() => {
-  //       setIsClaimDisabled(false);
-
-
-
-  //     }, 10000);
-  //   }
-  // };
-
+    if (dataPlay) {
+      setUnclaimedPoints(dataPlay?.unclaimedPoints || 0);
+  
+      // Mengatur interval untuk menambah unclaimedPoints setiap detik
+      const interval = setInterval(() => {
+        setUnclaimedPoints((prev) => prev + dataPlay?.perSecondEarn);
+      }, 1000);
+  
+      // Menghentikan interval setelah satu jam (3600 detik)
+      const timeout = setTimeout(() => {
+        clearInterval(interval);
+      }, 3600000); // 1 jam = 3600000 ms
+  
+      // Membersihkan interval dan timeout saat komponen di-unmount
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
+    }
+  }, [dataPlay]);
+  
+  
   const handleClaim = async () => {
-    if (claimPoint) {
+    try {
       setIsLoading(true);
-      const claimData = await claimPoint();
-
-
+  
+      await claimPoint();  // Memanggil API claim
+      await getMe();       // Memperbarui data pengguna tanpa penundaan
+  
+      // Menunggu 3 detik sebelum menghilangkan isLoading, tetapi tetap menonaktifkan tombol selama 10 detik
       setTimeout(() => {
-        getMe((prev) => prev + claimData.earnedPoints);
-        getMe((prev) => prev + claimData.earnedPoints);
-        play(0);
-        setTimer(3600);
-        setCanClaim(false);
-        setIsLoading(false);
-      }, 2000);
+        setIsLoading(false); // Loader berhenti setelah 3 detik
+        setUnclaimedPoints(0); // Set point ke 0 saat menunggu 10 detik
+      }, 3000); // 3 detik
+  
+      // Menunggu 10 detik sebelum memperbarui tampilan angka pada tombol
+      setTimeout(async () => {
+        await play();      // Memperbarui dataPlay setelah jeda waktu 10 detik
+  
+        // Reset tombol Claim ke nilai baru dari dataPlay setelah API play dijalankan
+        setUnclaimedPoints(dataPlay?.unclaimedPoints || 0);
+        setCanClaim(true);  // Mengaktifkan kembali tombol claim
+      }, 15000); // 10 detik = 10000ms
+  
+      setCanClaim(false);  // Nonaktifkan tombol selama 10 detik
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+      setCanClaim(true);  // Pastikan tombol diaktifkan kembali jika terjadi error
     }
   };
+  
+  
+  
 
-  const handleClick = async (event) => {
-    if (clickDelay || unclaimedPoints <= 0) return;
+  const handleClick = (event) => {
+    if (clickDelay || claimableCoins <= 0) return;
 
     const currentTime = Date.now();
     if (currentTime - lastClickTime < 10) {
@@ -115,12 +121,21 @@ const Page = () => {
     }
     setLastClickTime(currentTime);
 
-    if (unclaimedPoints > 0) {
-      const valueToAdd = dataPlay?.perSecondEarn || 0;
+    if (claimableCoins > 0) {
+      const valueToAdd = perSecondEarn;
       setBalance((prev) => prev + valueToAdd);
-      dataMe.points += valueToAdd;
-
-      setTimer((prev) => prev + 1);
+      setBalanceAirdrop((prev) => prev + valueToAdd);
+      setTimer((prev) => prev + 1); // Tambahkan 1 detik ke timer setiap kali gambar diklik
+      setClaimableCoins((prev) => {
+        const newClaimableCoins = prev - valueToAdd;
+        if (newClaimableCoins <= 0) {
+          setClickDelay(true);
+          setTimeout(() => {
+            setClickDelay(false);
+          }, 5000);
+        }
+        return newClaimableCoins < 0 ? 0 : newClaimableCoins;
+      });
 
       const { clientX, clientY } = event;
 
@@ -155,30 +170,20 @@ const Page = () => {
         );
         setTapTrails((prev) =>
           prev.filter((trail) => trail.id !== id)
+
+        
         );
       }, 2000);
-
-      const sessionData = await click();
-      if (sessionData) {
-        setTimer(3600 - sessionData.elapsedTimeInSeconds);
-        setBalance((prev) => prev + sessionData.unclaimedPoints);
-        dataMe.points = sessionData.unclaimedPoints;
-
-        setUnclaimedPoints(sessionData.unclaimedPoints); // Update unclaimedPoints setelah click
-
-        if (sessionData.perSecondEarn) {
-          dataPlay.perSecondEarn = sessionData.perSecondEarn;
-        }
-      }
     }
   };
-
   const formatTime = (seconds) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
+
+  
 
   return (
     <div className="earn-sec bgs w-full flex flex-col justify-start items-center min-h-screen overflow-y-scroll relative my-5">
@@ -258,22 +263,24 @@ const Page = () => {
           </div>
         </div>
         <button
-          className={`w-[330px] h-[55px]  rounded-xl flex justify-center items-center mt-10 ${isClaimDisabled || unclaimedPoints <= 0 ? 'bg-gray-400 cursor-not-allowed' : 'but'}`}
-          onClick={handleClaim}
-          disabled={ isLoading || !canClaim}
-        >
-          <div className="timer w-[15%] h-[55px] rounded-l-xl but flex flex-col justify-center items-center">
-            <IoTimer />
-            <p className="text-[8px]">{formatTime(timer)}</p>
-          </div>
-          <div className="claim w-[85%] flex justify-center items-center font-bold">
-            {isLoading ? (
-              <div className="loader"></div>
-            ) : (
-              <p>Claim {(claimableCoins).toLocaleString('en-US', { maximumFractionDigits: 6 })}</p>
-            )}
-          </div>
-        </button>
+  className={`w-[330px] h-[55px] rounded-xl flex justify-center items-center mt-10 ${canClaim ? 'but bg-blue-500' : 'bg-gray-500 cursor-not-allowed'}`}
+  onClick={handleClaim}
+  disabled={!canClaim || isLoading}
+>
+  <div className="timer w-[15%] h-[55px] rounded-l-xl but flex flex-col justify-center items-center">
+    <IoTimer />
+    <p className="text-[8px]">{formatTime(timer)}</p>
+  </div>
+  <div className="claim w-[85%] flex justify-center items-center font-bold">
+    {isLoading ? (
+      <div className="loader"></div>  // Loader jika sedang memproses claim
+    ) : (
+      <p>Claim {unclaimedPoints.toLocaleString('en-US', { maximumFractionDigits: 3 })}</p>  // Menampilkan unclaimedPoints
+    )}
+  </div>
+</button>
+
+
         <div className="wrap-coin-sec w-full flex flex-col justify-center items-center rounded-2xl mt-8  mb-28">
           <div className="img-warp w-[500] h-[200] object-contain">
             <Image

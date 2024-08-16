@@ -61,7 +61,7 @@ export default function Home() {
             </p>
           </div>
         </Link>
-        <p>{userData?.first_name}</p>
+        {/* <p>{userData?.first_name}</p> */}
       </div>
     </div>
   );

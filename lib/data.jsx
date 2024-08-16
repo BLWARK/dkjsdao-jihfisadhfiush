@@ -96,7 +96,7 @@ export const dataReferral = [
     userName_Telegram: "@Nobits88",
     name: "Rhonald Bastian",
     name_Telegram: "Rhonald bastian",
-    totalReferral: 12, // Changed to number for easier comparison
+    totalReferral: 1, // Changed to number for easier comparison
     referrals: [
       {
         userName_Telegram: "@Erros",
