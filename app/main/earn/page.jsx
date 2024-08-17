@@ -14,6 +14,7 @@ const Page = () => {
     setBalance,
     balanceAirdrop,
     setBalanceAirdrop,
+    
     timer,
     setTimer,
     canClaim,
@@ -62,7 +63,7 @@ const Page = () => {
       await play();
       if (dataPlay) {
         setClaimableCoins(dataPlay.unclaimedPoints);
-        setPerSecondEarn(dataPlay.perSecondEarn);
+        
         setTimer(3600 - dataPlay.elapsedTimeInSeconds); // Sync timer with backend
       }
     };

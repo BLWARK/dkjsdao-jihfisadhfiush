@@ -14,7 +14,7 @@ export const GlobalStateProvider = ({ children }) => {
   const [canClaim, setCanClaim] = useState(false);
   const [claimableCoins, setClaimableCoins] = useState(0);
   const [userLevel, setUserLevel] = useState("Urban Survivor");
-  const [perSecondEarn, setPerSecondEarn] = useState(0.185);
+  const [perSecondEarn, setPerSecondEarn] = useState(0);
   const [levelImage, setLevelImage] = useState("/UrbanSurvivor.png");
   const [nftRewardBonus, setNftRewardBonus] = useState(0);
   const [checkpointDone, setCheckpointDone] = useState(false);
@@ -23,6 +23,7 @@ export const GlobalStateProvider = ({ children }) => {
   const [lastCheckpointDate, setLastCheckpointDate] = useState("");
   const [userNFTs, setUserNFTs] = useState(dataUser.nfts);
   const [completedTasks, setCompletedTasks] = useState([]); // State untuk menyimpan task yang selesai
+  
 
   const getNftCountAndRarity = () => {
     let countR = 0;
