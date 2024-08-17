@@ -45,11 +45,8 @@ const Page = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastClickTime, setLastClickTime] = useState(0);
   const [clickDelay, setClickDelay] = useState(false);
-  const [unclaimedPoints, setUnclaimedPoints] = useState(0); // State untuk unclaimedPoints
+  const [unclaimedPoints, setUnclaimedPoints] = useState(0); // State for unclaimedPoints
   const [isClickDisabled, setIsClickDisabled] = useState(false);
-  const [isClaimDisabled, setIsClaimDisabled] = useState(false); // State untuk menonaktifkan tombol Claim
-  const [clickCount, setClickCount] = useState(0); // Tambahkan ini di bagian atas komponen
-
   const playCalled = useRef(false);
 
   useEffect(() => {
@@ -74,7 +71,7 @@ const Page = () => {
       initializeData();
       playCalled.current = true;
     }
-  }, []); // Run this effect only onceggil sekali saat komponen pertama kali dimuat
+  }, []); // Run this effect only once
 
 
   useEffect(() => {
@@ -122,9 +119,6 @@ const Page = () => {
   }, [dataPlay]);
   
   
-  
-  
-  
   const handleClaim = async () => {
     try {
       setIsLoading(true);
@@ -164,8 +158,6 @@ const Page = () => {
       setCanClaim(true);  // Pastikan tombol diaktifkan kembali jika terjadi error
     }
   };
-  
-  
   
   
   useEffect(() => {
@@ -226,7 +218,6 @@ const Page = () => {
   };
   
   
-
   const formatTime = (seconds) => {
     const secs = Math.floor(seconds); // Pastikan nilai detik adalah integer
     const hrs = Math.floor(secs / 3600);
@@ -255,7 +246,7 @@ const Page = () => {
           style={{ left: trail.x, top: trail.y }}
         ></div>
       ))}
-      <div className="wrap-farm w-full px-4 flex flex-col justify-center items-center mt-5 ">
+      <div className="wrap-farm w-full px-4 flex flex-col justify-center items-center  ">
         <div className="top-sec w-full flex justify-between items-center ">
           <div className="top-user w-[50%] flex items-center justify-start gap-2">
             <button className="gap-2 px-2 flex flex-col justify-start items-start ">
