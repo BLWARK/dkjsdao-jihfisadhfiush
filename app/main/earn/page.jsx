@@ -310,6 +310,7 @@ const Page = () => {
               alt="Level Image"
               width={240}
               height={240}
+              priority={true}
               className={`coin1 mt-8 ${coinClicked ? 'clicked' : ''}`}
             />
           </div>
@@ -341,6 +342,7 @@ const Page = () => {
               width={360}
               height={50}
               className="rounded-xl"
+              priority={true}
               onClick={() => window.open("https://xyznt.io", "_blank")}
             />
           </div>
