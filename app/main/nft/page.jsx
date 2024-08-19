@@ -5,7 +5,7 @@ import { useGlobalState } from '@/context/GlobalStateContext'; // Import the glo
 import { dataNFT } from '@/lib/data'; // Import dataNFT
 import Link from 'next/link';
 
-const Page = () => {
+const Nft = () => {
   const { userNFTs, getNftCountAndRarity, nftRewardBonus } = useGlobalState(); // Ambil data kepemilikan NFT user dan fungsi terkait dari global state
   const scrollRef = useRef(null); // Ref untuk kontainer scroll
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -150,4 +150,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default Nft;

@@ -13,25 +13,7 @@ export const BackProvider = ({ children }) => {
   const [dataPlay, setDataPlay] = useState();
   const [clickCoin, setClickCoin] = useState();
   const [claim, setClaim] = useState();
-
-//   const [balance, setBalance] = useState(dataUser.balanceAirdrop);
-//   const [balanceAirdrop, setBalanceAirdrop] = useState(dataUser.balanceAirdrop);
-//   const [balanceFarming, setBalanceFarming] = useState(dataUser.balanceFarming);
-//   const [referrals, setRefferals] = useState(dataReferral[0].totalReferral);
-//   const [hourEarn, setHourEarn] = useState(666);
-//   const [timer, setTimer] = useState(3600);
-//   const [canClaim, setCanClaim] = useState(false);
-//   const [claimableCoins, setClaimableCoins] = useState(0);
-//   const [userLevel, setUserLevel] = useState("Urban Survivor");
-//   const [perSecondEarn, setPerSecondEarn] = useState(0.185);
-//   const [levelImage, setLevelImage] = useState("/UrbanSurvivor.png");
-//   const [nftRewardBonus, setNftRewardBonus] = useState(0);
-//   const [checkpointDone, setCheckpointDone] = useState(false);
-//   const [checkpointCount, setCheckpointCount] = useState(0);
-//   const [pointsReached, setPointsReached] = useState({});
-//   const [lastCheckpointDate, setLastCheckpointDate] = useState("");
-//   const [userNFTs, setUserNFTs] = useState(dataUser.nfts);
-//   const [completedTasks, setCompletedTasks] = useState([]);
+  const [rank, setRank] = useState ();
 
   const login = async ( userData ) => {
     const data = {
@@ -101,6 +83,30 @@ export const BackProvider = ({ children }) => {
     }
   }
 
+  const leaderboard = async () => {
+    try{
+      const res = await customGet('api/v1/leaderboard')
+      console.log(res)
+      setRank(res);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const loginReferral = async (referral) => {
+   
+    toast.loading("Logging in with referral code"); 
+    try {
+      const res = await customPost(`/api/v1/auth/telegram/${referral}` );
+      return res.data;
+    } catch (error) {
+      console.log(error);
+      toast.error("Invalid referral code");
+    } finally {
+      toast.dismiss();
+    }
+  };
+
   return (
     <BackContext.Provider
       value={{
@@ -109,6 +115,9 @@ export const BackProvider = ({ children }) => {
         play,
         click,
         claimPoint,
+        leaderboard,
+        loginReferral,
+        rank,
         dataMe,
         dataPlay,
         clickCoin,

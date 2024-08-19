@@ -1,28 +1,41 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { IoMdPersonAdd } from "react-icons/io";
 import { IoCopyOutline } from "react-icons/io5";
-import { dataReferral } from "@/lib/data"; // Import data referral
 import { useBackend } from "@/context/BackContext";
 
-const Page = () => {
+const Invite = () => {
   const [animate, setAnimate] = useState(false);
-  const [referrals, setReferrals] = useState(dataReferral[0].referrals); // Mengambil data referral dari lib/data.js
+  const { dataMe, getMe } = useBackend();
 
+  const initialized = useRef(false); // Ref to prevent multiple API calls
 
-  const {
-    dataMe,
-    getMe,
-  } = useBackend();
+  const initialize = async () => {
+    if (!dataMe && !initialized.current) {
+      await getMe(); // Call API once
+      initialized.current = true; // Mark as initialized
+    }
+  };
 
   useEffect(() => {
-    getMe();
-
+    initialize(); // Run initialize only once
   }, []);
+  // Buat referralLink menggunakan data dari API
+  const referralLink = `https://t.me/Xyzmercoin_bot?referralCode=${dataMe?.referralCode}`;
 
+  // Fungsi untuk membagikan tautan referral ke platform
+  const handleShare = (platform) => {
+    let shareUrl = "";
+    const encodedLink = encodeURIComponent(referralLink);
+    if (platform === "telegram") {
+      shareUrl = `https://t.me/share/url?url=${encodedLink}`;
+    }
 
+    window.open(shareUrl, "_blank");
+  };
+
+  // Animasi button pulse
   useEffect(() => {
     const interval = setInterval(() => {
       setAnimate(true);
@@ -52,7 +65,7 @@ const Page = () => {
             <p className="font-md text-[12px] flex justify-center items-center px-2">
               <span className="text-orange-500 font-bold text-[12px] flex justify-center items-center mr-1 gap-1">
                 <Image src="/XYZMER COIN.png" alt="gift" width={13} height={13} />
-                +6,666
+                +666
               </span>
               for every friend who join and play
             </p>
@@ -60,30 +73,35 @@ const Page = () => {
         </div>
         <div className="list-friends w-full flex flex-col justify-start items-start mt-10">
           <div className="title-list-friend font-bold text-[14px]">
-            <p>Total Referral ({referrals.length})</p>
+            <p>Total Referral ({dataMe?.referredUsers?.length || 0})</p> {/* Menampilkan jumlah total referral */}
           </div>
           <div className="all-friends overflow-y-scroll h-[240px] gap-4 mt-5">
-            {referrals.map((referral, index) => (
-              <div
-                key={index}
-                className="list1 w-[360px] h-[80px] flex justify-between items-center bgs mt-3 rounded-xl p-4"
-              >
-                <div className="flex flex-col">
-                  <p className="text-white text-[14px]">
-                    {referral.userName_Telegram}
-                  </p>
-                  <p className="text-gray-400 text-[12px]">{referral.name}</p>
+            {dataMe?.referredUsers?.length > 0 ? (
+              dataMe.referredUsers.map((referral, index) => (
+                <div
+                  key={referral._id}
+                  className="list1 w-[360px] h-[80px] flex justify-between items-center bgs mt-3 rounded-xl p-4"
+                >
+                  <div className="flex flex-col">
+                    <p className="text-white text-[14px]">
+                      {referral.username}
+                    </p>
+                    <p className="text-gray-400 text-[12px]">{referral.firstName}</p>
+                  </div>
+                  <div className="flex flex-col">
+                    <p className="font-regular text-[12px]">Total Points</p>
+                    <p className="text-end text-[12px]">{referral.points}</p>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <p className="font-regular text-[12px]">Total Points</p>
-                  <p className="text-end text-[12px]">{referral.balanceAirdrop}</p>
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-white italic flex justify-center items-center text-[12px]">No referrals yet.</p>
+            )}
           </div>
         </div>
         <div className="button-invite w-full flex justify-center items-center gap-3 mt-10">
           <button
+            onClick={() => handleShare("telegram")}
             className={`w-[80%] h-[65px] but rounded-xl font-bold flex justify-center items-center gap-2 ${animate ? "pulseInvite" : ""}`}
           >
             <IoMdPersonAdd />
@@ -99,4 +117,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default Invite;

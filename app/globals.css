@@ -678,3 +678,20 @@ body {
   align-items: center;
   color: white;
 }
+
+
+.coin-increment {
+  animation: coinPop 0.3s ease-in-out;
+}
+
+@keyframes coinPop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

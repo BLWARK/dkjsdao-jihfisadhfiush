@@ -22,7 +22,7 @@ const getIconComponent = (iconName) => {
   return iconMap[iconName] || null;
 };
 
-const Page = () => {
+const Claim = () => {
   const { balanceAirdrop, setBalanceAirdrop, userLevel, checkpointDone, setCheckpointDone, checkpointCount, setCheckpointCount, lastCheckpointDate, setLastCheckpointDate, completedTasks, setCompletedTasks } = useGlobalState();
   const [showPopup, setShowPopup] = useState(false);
   const [showReviewPopup, setShowReviewPopup] = useState(false);
@@ -456,4 +456,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default Claim;

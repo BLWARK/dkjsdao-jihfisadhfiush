@@ -7,7 +7,7 @@ import Link from "next/link";
 import { dataLevel } from "@/lib/data";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 
-const Page = () => {
+const Level = () => {
   const { userLevel, perSecondEarn, referrals, balanceAirdrop, checkpointCount, pointsReached, getNftCountAndRarity, hasCompletedCheckpoint } = useGlobalState();
   
   const [showLevelInfoPopup, setShowLevelInfoPopup] = useState(false);
@@ -246,4 +246,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default Level;
