@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
+import { Player } from "@lottiefiles/react-lottie-player"; // Lottie Player
 import { IoWallet, IoTimer } from "react-icons/io5";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { useGlobalState } from "@/context/GlobalStateContext";
@@ -40,29 +41,48 @@ const Earn = () => {
   const [unclaimedPoints, setUnclaimedPoints] = useState(0); // State for unclaimed points
   const [isClickDisabled, setIsClickDisabled] = useState(false); // State to disable clicks during certain conditions
   const [coinAdded, setCoinAdded] = useState(false); // State to trigger animation when coins/points are added
+  const [isInitialLoading, setIsInitialLoading] = useState(true); // State for initial loading
+  const [isClaimLoading, setIsClaimLoading] = useState(false); // State for claim loading
 
   const playCalled = useRef(false); // Ref to ensure play is only called once
 
+  // Tambahkan state untuk memeriksa apakah data sedang di-load
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    // Function to initialize data by fetching user and play session data
     const initializeData = async () => {
-      await getMe(); // Fetch user data from backend
-      if (dataMe) {
-        setBalanceAirdrop(dataMe.points); // Update balance with user points from backend
+      try {
+        setIsLoading(true); 
+  
+        const userData = await getMe(); 
+        const playData = await play(); 
+  
+        if (userData) {
+          setBalanceAirdrop(userData.points); 
+        
+        }
+  
+        if (playData) {
+          setClaimableCoins(playData.unclaimedPoints); 
+          setTimer(3600 - playData.elapsedTimeInSeconds); 
+        } 
+  
+        // Hanya set loading ke false jika userData dan playData sudah ada
+        setIsInitialLoading(false);
+      } catch (error) {
+        console.error("Error initializing data:", error);
+        setIsInitialLoading(false);
       }
 
-      await play(); // Start or continue the game session
-      if (dataPlay) {
-        setClaimableCoins(dataPlay.unclaimedPoints); // Update claimable points
-        setTimer(3600 - dataPlay.elapsedTimeInSeconds); // Set timer based on elapsed time in seconds from backend
-      }
+      
     };
-
+  
     if (!playCalled.current) {
-      initializeData(); // Call the function to initialize data
-      playCalled.current = true; // Set the ref to prevent multiple calls
+      initializeData(); 
+      playCalled.current = true; 
     }
-  }, [dataPlay]); // Run this effect only once
+  }, []); 
+   
 
   useEffect(() => {
     // Effect to update timer and manage countdown for game session
@@ -100,41 +120,57 @@ const Earn = () => {
 
   const handleClaim = async () => {
     try {
-      setIsLoading(true); // Set loading state to true
-      setCanClaim(false); // Disable claim button immediately
-
+      setIsClaimLoading(true); // Set animasi loading klaim
+      setCanClaim(false); // Disable tombol klaim
+  
       if (unclaimedPoints <= 0) {
-        console.warn("No points to claim."); // Log warning if no points are available for claim
-        setIsLoading(false); // Reset loading state
-        setCanClaim(true); // Re-enable claim button
+        console.warn("No points to claim.");
+        setIsClaimLoading(false); // Hentikan animasi loading klaim
+        setCanClaim(true); // Aktifkan kembali tombol klaim
         return;
       }
-
-      const claimResponse = await claimPoint(); // Call backend to claim points
-      console.log("Claim Response:", claimResponse); // Log the claim response
-
-      await getMe(); // Refresh user data after claim
-
-      const { elapsedTimeInSeconds } = await play(); // Restart or continue the game session
-      console.log("Play Response Elapsed Time:", elapsedTimeInSeconds);
-
-      setTimer(3600 - elapsedTimeInSeconds); // Reset the timer
-      setUnclaimedPoints(0); // Reset unclaimed points after a claim is made
-
-      setIsLoading(false); // Reset loading state
-      setTimeout(() => setCanClaim(true), 5000); // Re-enable claim button after 5 seconds
+  
+      const claimResponse = await claimPoint(); // Lakukan klaim
+      console.log("Claim Response:", claimResponse);
+  
+      // Lanjutkan tanpa mengubah status loading klaim
+      const updateUserData = async () => {
+        await getMe(); // Refresh data user
+  
+        // Dapatkan respons dari play dan cek jika data valid
+        const playResponse = await play(); // Lanjutkan atau mulai sesi baru
+  
+        // Pastikan playResponse valid sebelum destruktur
+        if (playResponse && playResponse.elapsedTimeInSeconds !== undefined) {
+          const { elapsedTimeInSeconds } = playResponse;
+          setTimer(3600 - elapsedTimeInSeconds); // Reset timer
+          setUnclaimedPoints(0); // Reset poin yang belum diklaim
+        } else {
+          console.error("Invalid play response", playResponse); // Tambahkan log jika respons tidak valid
+        }
+      };
+  
+      updateUserData(); // Memanggil API `play` dan `getMe` tanpa mengubah state loading klaim
+  
+      setIsClaimLoading(false); // Hentikan animasi loading klaim setelah klaim selesai
+      setTimeout(() => setCanClaim(true), 5000); // Aktifkan kembali tombol klaim setelah 5 detik
     } catch (error) {
-      console.log("Error in handleClaim:", error); // Log any errors that occur
-      setIsLoading(false); // Reset loading state in case of error
-      setCanClaim(true); // Ensure the claim button is re-enabled in case of error
+      console.error("Error in handleClaim:", error);
+      setIsClaimLoading(false); // Hentikan animasi loading klaim jika terjadi error
+      setCanClaim(true); // Aktifkan kembali tombol klaim
     }
   };
+  
+  
 
   useEffect(() => {
     if (dataMe) {
       setBalanceAirdrop(dataMe.points); // Update balance with points from backend
     }
   }, [dataMe]); // Re-run effect when dataMe changes
+
+
+
 
   const handleClick = (event) => {
     if (isClickDisabled) return; // Prevent clicks if clicking is disabled
@@ -144,7 +180,8 @@ const Earn = () => {
     setLastClickTime(currentTime); // Update the last click time
 
     if (unclaimedPoints > 0) {
-      const valueToAdd = Math.min(unclaimedPoints, perSecondEarn); // Calculate the amount to add, without exceeding unclaimed points
+      const valueToAdd = perSecondEarn / 1000;
+      // const valueToAdd = Math.min(unclaimedPoints, perSecondEarn); // Calculate the amount to add, without exceeding unclaimed points
 
       setBalance((prev) => prev + valueToAdd); // Update balance
       setBalanceAirdrop((prev) => prev + valueToAdd); // Update balance airdrop
@@ -197,6 +234,20 @@ const Earn = () => {
       .padStart(2, "0")}:${remainingSecs.toString().padStart(2, "0")}`; // Return formatted time string
   };
 
+  // Jika masih loading, tampilkan animasi Lottie
+  if (isInitialLoading) {
+    return (
+      <div className="loading-screen flex justify-center items-center h-screen">
+        <Player
+          autoplay
+          loop
+          src="https://lottie.host/16594a2c-c2ad-4196-98e2-51ab691a2e8d/ycygvL2itD.json" // Link animasi Lottie
+          style={{ height: "150px", width: "150px" }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="earn-sec bgs w-full flex flex-col justify-start items-center min-h-screen overflow-y-scroll relative my-5">
       {/* Render floating numbers for point addition visual feedback */}
@@ -223,7 +274,7 @@ const Earn = () => {
             <button className="gap-2 px-2 flex flex-col justify-start items-start">
               {/* Render user's username */}
               <p className="text-[12px] font-bold">
-                Hi, {dataMe ? dataMe?.username : "loading"}
+                Hi, {dataMe ? dataMe?.firstName : "loading"}
               </p>
               {/* Link to user's level */}
               <Link
@@ -310,7 +361,7 @@ const Earn = () => {
           <div className="coin-sec w-full flex flex-col justify-center items-center -mt-3">
             <div className="coins1 mt-8"></div>
             <Image
-              src={`/${dataMe?.level}.png`}
+              src={dataMe?.level ? `/${dataMe.level}.png` : "/1.png"}
               alt="Level Image"
               width={240}
               height={240}
@@ -320,27 +371,32 @@ const Earn = () => {
           </div>
         </div>
         {/* Render claim button */}
-        <button
+         <button
           className={`w-[330px] h-[55px] rounded-xl flex justify-center items-center mt-10 ${
             canClaim ? "but bg-blue-500" : "bg-gray-500 cursor-not-allowed"
           }`}
           onClick={handleClaim}
-          disabled={!canClaim || isLoading}
+          disabled={!canClaim || isClaimLoading}
         >
           <div className="timer w-[15%] h-[55px] rounded-l-xl but flex flex-col justify-center items-center">
             <IoTimer />
             <p className="text-[8px]">{formatTime(timer)}</p>
           </div>
           <div className="claim w-[85%] flex justify-center items-center font-bold">
-            {isLoading ? (
-              <div className="loader"></div> // Loader for processing claim
+            {isClaimLoading ? (
+              <Player
+                autoplay
+                loop
+                src="https://lottie.host/16594a2c-c2ad-4196-98e2-51ab691a2e8d/ycygvL2itD.json"
+                style={{ height: "50px", width: "50px" }}
+              />
             ) : (
               <p>
                 Claim{" "}
                 {unclaimedPoints.toLocaleString("en-US", {
                   maximumFractionDigits: 3,
                 })}
-              </p> // Show unclaimed points
+              </p>
             )}
           </div>
         </button>

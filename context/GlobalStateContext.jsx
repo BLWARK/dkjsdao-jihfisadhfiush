@@ -56,7 +56,7 @@ export const GlobalStateProvider = ({ children }) => {
   const checkLevelCriteria = (referrals, nftCountR, nftCountSR) => {
     if (referrals >= 10 && nftCountSR >= 2) {
       return 6; // Billionaire Visionary
-    }
+    }  
     if (referrals >= 8 && nftCountSR >= 1) {
       return 5; // Enterprise Leader
     }

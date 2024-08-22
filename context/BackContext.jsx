@@ -14,6 +14,7 @@ export const BackProvider = ({ children }) => {
   const [clickCoin, setClickCoin] = useState();
   const [claim, setClaim] = useState();
   const [rank, setRank] = useState ();
+  const [total, setTotal] = useState ();
 
   const login = async ( userData ) => {
     const data = {
@@ -40,11 +41,47 @@ export const BackProvider = ({ children }) => {
     } 
   };
 
+  const loginReferral = async (referral, userData) => {
+    const data = {
+      id: userData?.id,
+      first_name: userData?.first_name,
+      last_name: userData?.last_name,
+      username: userData?.username,
+      language_code: userData?.language_code,
+      is_premium: userData?.is_premium,
+    };
+     
+    
+    try {
+      const res = await customPost(`/api/v1/auth/telegram/${referral}`, data);
+      
+      if (res?.data?.token) {
+        localStorage.setItem("token", res.data.token);
+        return res.data;  // Return the response data if needed for further processing
+      } else {
+        throw new Error("Login failed");
+      }
+    } catch (error) {
+      console.error("Error logging in with referral:", error);
+    }  
+  };
+  
+
   const getMe = async () => {
     try {
       const res = await customGet(`/api/v1/me`);
       console.log(res)
       setDataMe(res?.user);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const totalUsers = async () => {
+    try {
+      const res = await customGet(`/api/v1/total-user`);
+      console.log(res);
+      setTotal(res?.totalUser); // Akses langsung totalUser dari respons
     } catch (error) {
       console.log(error);
     }
@@ -93,19 +130,7 @@ export const BackProvider = ({ children }) => {
     }
   }
 
-  const loginReferral = async (referral) => {
-   
-    toast.loading("Logging in with referral code"); 
-    try {
-      const res = await customPost(`/api/v1/auth/telegram/${referral}` );
-      return res.data;
-    } catch (error) {
-      console.log(error);
-      toast.error("Invalid referral code");
-    } finally {
-      toast.dismiss();
-    }
-  };
+  
 
   return (
     <BackContext.Provider
@@ -117,11 +142,13 @@ export const BackProvider = ({ children }) => {
         claimPoint,
         leaderboard,
         loginReferral,
+        totalUsers,
         rank,
         dataMe,
         dataPlay,
         clickCoin,
         claim,
+        total,
       }}
     >
       {children}

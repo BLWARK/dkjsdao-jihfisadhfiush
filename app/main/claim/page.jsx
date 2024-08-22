@@ -37,6 +37,7 @@ const Claim = () => {
   const [showCheckpointReasonPopup, setShowCheckpointReasonPopup] = useState(false);
   const [startCount, setStartCount] = useState(balanceAirdrop);
   const [endCount, setEndCount] = useState(balanceAirdrop);
+  const [overlayVisible, setOverlayVisible] = useState(true); // Overlay state
 
   useEffect(() => {
     setStartCount(endCount);
@@ -145,6 +146,15 @@ const Claim = () => {
   const specialTasks = dataTask.filter(task => task.id >= 10 && task.id <= 12);
 
   return (
+    <div className="relative">
+    {/* Overlay that covers the page except for the top 80px */}
+    {overlayVisible && (
+        <div className="fixed bottom-[80px] left-0 right-0 bg-black bg-opacity-70 z-10" style={{ height: 'calc(100vh - 80px)' }}>
+          <div className="text-center flex flex-col justify-center items-center h-full">
+            <p className="text-white text-3xl mb-4 font-bold">Coming Soon</p>
+          </div>
+        </div>
+      )}
     <div className="invite-sec w-full flex flex-col justify-start items-center min-h-screen overflow-y-scroll bgs">
       <div className="wrap-invite w-full px-4 flex flex-col justify-center items-center mt-5">
         <div className="subtitle w-full text-[24px] text-left flex justify-center items-center mt-5 font-bold">
@@ -452,6 +462,7 @@ const Claim = () => {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };
