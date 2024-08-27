@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { Player } from "@lottiefiles/react-lottie-player"; // Lottie Player
 import { IoWallet, IoTimer } from "react-icons/io5";
-import { MdOutlineKeyboardArrowRight } from "react-icons/md";
+import { MdOutlineKeyboardArrowRight, MdClose } from "react-icons/md";
 import { useGlobalState } from "@/context/GlobalStateContext";
 import { useBackend } from "@/context/BackContext";
 import CoinImage from "@/public/Coins1.png";
@@ -43,8 +43,18 @@ const Earn = () => {
   const [coinAdded, setCoinAdded] = useState(false); // State to trigger animation when coins/points are added
   const [isInitialLoading, setIsInitialLoading] = useState(true); // State for initial loading
   const [isClaimLoading, setIsClaimLoading] = useState(false); // State for claim loading
+  const [clickCount, setClickCount] = useState(0); // State to track click count
+  const [showPopup, setShowPopup] = useState(false); // State for controlling popup
 
   const playCalled = useRef(false); // Ref to ensure play is only called once
+
+  useEffect(() => {
+    const popupShown = localStorage.getItem("popupShown");
+    if (!popupShown) {
+      setShowPopup(true); // Show popup if it hasn't been shown before
+      localStorage.setItem("popupShown", "true"); // Set it so it won't show again
+    }
+  }, []);
 
   // Tambahkan state untuk memeriksa apakah data sedang di-load
   const [loading, setLoading] = useState(true);
@@ -179,9 +189,10 @@ const Earn = () => {
     if (currentTime - lastClickTime < 10) return; // Prevent multiple clicks within a very short time
     setLastClickTime(currentTime); // Update the last click time
 
+    setClickCount((prevCount) => prevCount + 1); // Increment click count locally
+
     if (unclaimedPoints > 0) {
-      const valueToAdd = perSecondEarn / 1000;
-      // const valueToAdd = Math.min(unclaimedPoints, perSecondEarn); // Calculate the amount to add, without exceeding unclaimed points
+      const valueToAdd = perSecondEarn; // Remove the division by 1000
 
       setBalance((prev) => prev + valueToAdd); // Update balance
       setBalanceAirdrop((prev) => prev + valueToAdd); // Update balance airdrop
@@ -209,11 +220,12 @@ const Earn = () => {
       clearTimeout(clickDelay); // Clear the previous click delay timeout
       const newDelay = setTimeout(async () => {
         try {
-          await click({ clickCount: 1 }); // Notify backend of the click event
+          await click({ clickCount }); // Send the total click count to backend
+          setClickCount(0); // Reset the click count after sending to backend
         } catch (error) {
           console.error("Error during click:", error); // Log any click-related errors
         }
-      }, 2000);
+      }, 2000); // Send clicks to backend after 2 seconds of inactivity
       setClickDelay(newDelay); // Set new click delay timeout
 
       setTimeout(() => setCoinAdded(false), 300); // Reset coin addition animation after 0.3 seconds
@@ -222,6 +234,7 @@ const Earn = () => {
       setTimeout(() => setIsClickDisabled(false), 3000); // Re-enable clicking after 3 seconds
     }
   };
+
 
   const formatTime = (seconds) => {
     // Function to format time (seconds) into HH:MM:SS
@@ -232,7 +245,14 @@ const Earn = () => {
     return `${hrs.toString().padStart(2, "0")}:${mins
       .toString()
       .padStart(2, "0")}:${remainingSecs.toString().padStart(2, "0")}`; // Return formatted time string
+      
   };
+
+
+  const handleClosePopup = () => {
+    setShowPopup(false); // Hide the popup when the close button is clicked
+  };
+
 
   // Jika masih loading, tampilkan animasi Lottie
   if (isInitialLoading) {
@@ -250,6 +270,29 @@ const Earn = () => {
 
   return (
     <div className="earn-sec bgs w-full flex flex-col justify-start items-center min-h-screen overflow-y-scroll relative my-5">
+        {/* Popup */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center px-3">
+          <div className="relative  rounded-lg shadow-lg p-1 w-screen justify-center items-center flex flex-col gap-4">
+            <button 
+              className="absolute top-2 right-2 text-white hover:text-gray-700"
+              onClick={handleClosePopup}
+            >
+              <MdClose size={24} />
+            </button>
+            <Image 
+              src="/NewFeature.jpg" 
+              alt="New Feature" 
+              width={400} 
+              height={400} 
+              className="rounded-md"
+            />
+            <Link href="/main/claim" className="text-center text-white font-bold px-4 w-full py-5  but rounded-xl mb-3 ">Check out our New Feature!</Link>
+          </div>
+        </div>
+      )}
+
+
       {/* Render floating numbers for point addition visual feedback */}
       {floatingNumbers.map((num) => (
         <div
@@ -270,7 +313,7 @@ const Earn = () => {
       ))}
       <div className="wrap-farm w-full px-4 flex flex-col justify-center items-center">
         <div className="top-sec w-full flex justify-between items-center">
-          <div className="top-user w-[50%] flex items-center justify-start gap-2">
+          <div className="top-user w-[60%] flex items-center justify-start gap-2">
             <button className="gap-2 px-2 flex flex-col justify-start items-start">
               {/* Render user's username */}
               <p className="text-[12px] font-bold">
@@ -279,7 +322,7 @@ const Earn = () => {
               {/* Link to user's level */}
               <Link
                 href="/main/level"
-                className="flex justify-center items-center text-blue-400"
+                className="flex justify-start items-center text-blue-400"
               >
                 <p className="text-[12px] font-bold">
                   <span className="text-[12px] font-light text-gray-400">

@@ -17,7 +17,7 @@ const Navbar = () => {
     { href: "/main/invite", icon: IoMdPersonAdd, label: "Invite" },
     { href: "/main/nft", icon: AiFillDollarCircle, label: "NFT" },
     { href: "/main/rank", icon: MdLeaderboard, label: "Rank" },
-    { href: "/main/claim", icon: IoGift, label: "Claim" }
+    { href: "/main/claim", icon: IoGift, label: "Task" }
   ];
 
   return (
