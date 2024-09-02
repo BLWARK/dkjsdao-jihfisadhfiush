@@ -46,4 +46,13 @@ export async function customGet(endpoint, options = {}) {
     }
   }
   
+  export async function customPatch(endpoint, data = {}, options = {}) {
+    try {
+      const res = await customAxios.patch(endpoint, data, options);
+      return res.data;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
   

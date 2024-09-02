@@ -695,3 +695,36 @@ body {
     transform: scale(1);
   }
 }
+
+
+/* styles.css */
+
+.progress-container {
+  width: 100%;
+  background-color: #aaaaaa;
+  border-radius: 20px;
+  height: 30px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar {
+  background: linear-gradient(to right, #4ade80, #3b82f6);
+  height: 100%;
+  border-radius: 20px;
+  transition: width 1.5s ease-in-out;
+}
+
+.progress-percentage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: white;
+  z-index: 1;  /* Ensure text is above the bar */
+}

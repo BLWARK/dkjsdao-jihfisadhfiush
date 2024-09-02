@@ -30,6 +30,8 @@ const Earn = () => {
     play, // Function to initiate or continue a game session
     claimPoint, // Function to claim points
     click, // Function to handle click interactions with backend
+    connectWallet,
+    getMeNFT,
   } = useBackend();
 
   const [floatingNumbers, setFloatingNumbers] = useState([]); // Local state to manage floating numbers for visual feedback
@@ -45,6 +47,10 @@ const Earn = () => {
   const [isClaimLoading, setIsClaimLoading] = useState(false); // State for claim loading
   const [clickCount, setClickCount] = useState(0); // State to track click count
   const [showPopup, setShowPopup] = useState(false); // State for controlling popup
+  const [showConnectWalletPopup, setShowConnectWalletPopup] = useState(false);
+  const [walletAddress, setWalletAddress] = useState();
+  const [totalNftReward, setTotalNftReward] = useState(0); // State untuk total NFT reward
+  const locale = "en-US";
 
   const playCalled = useRef(false); // Ref to ensure play is only called once
 
@@ -62,37 +68,59 @@ const Earn = () => {
   useEffect(() => {
     const initializeData = async () => {
       try {
-        setIsLoading(true); 
-  
-        const userData = await getMe(); 
-        const playData = await play(); 
-  
+        setIsLoading(true);
+
+        const userData = await getMe();
+        const playData = await play();
+
         if (userData) {
-          setBalanceAirdrop(userData.points); 
-        
+          setBalanceAirdrop(userData.points);
         }
-  
+
         if (playData) {
-          setClaimableCoins(playData.unclaimedPoints); 
-          setTimer(3600 - playData.elapsedTimeInSeconds); 
-        } 
-  
+          setClaimableCoins(playData.unclaimedPoints);
+          setTimer(3600 - playData.elapsedTimeInSeconds);
+        }
+
         // Hanya set loading ke false jika userData dan playData sudah ada
         setIsInitialLoading(false);
       } catch (error) {
         console.error("Error initializing data:", error);
         setIsInitialLoading(false);
       }
-
-      
     };
-  
+
     if (!playCalled.current) {
-      initializeData(); 
-      playCalled.current = true; 
+      initializeData();
+      playCalled.current = true;
     }
-  }, []); 
-   
+  }, []);
+
+  useEffect(() => {
+    if (dataMe && dataMe.walletAddress) {
+      setWalletAddress(dataMe.walletAddress); // Set wallet address dari dataMe
+    }
+  }, [dataMe]);
+
+  useEffect(() => {
+    const fetchNftRewards = async () => {
+      try {
+        const nftData = await getMeNFT(); // Panggil API getMeNFT
+
+        if (nftData) {
+          const totalRewardCalc = nftData.reduce(
+            (acc, nft) => acc + (nft.reward || 0),
+            0
+          );
+          setTotalNftReward(totalRewardCalc); // Simpan total reward ke state
+        }
+      } catch (error) {
+        console.error("Error fetching NFT data:", error);
+      }
+    };
+
+    fetchNftRewards(); // Panggil fungsi untuk mengambil dan menghitung reward NFT
+  }, []);
 
   useEffect(() => {
     // Effect to update timer and manage countdown for game session
@@ -132,24 +160,24 @@ const Earn = () => {
     try {
       setIsClaimLoading(true); // Set animasi loading klaim
       setCanClaim(false); // Disable tombol klaim
-  
+
       if (unclaimedPoints <= 0) {
         console.warn("No points to claim.");
         setIsClaimLoading(false); // Hentikan animasi loading klaim
         setCanClaim(true); // Aktifkan kembali tombol klaim
         return;
       }
-  
+
       const claimResponse = await claimPoint(); // Lakukan klaim
       console.log("Claim Response:", claimResponse);
-  
+
       // Lanjutkan tanpa mengubah status loading klaim
       const updateUserData = async () => {
         await getMe(); // Refresh data user
-  
+
         // Dapatkan respons dari play dan cek jika data valid
         const playResponse = await play(); // Lanjutkan atau mulai sesi baru
-  
+
         // Pastikan playResponse valid sebelum destruktur
         if (playResponse && playResponse.elapsedTimeInSeconds !== undefined) {
           const { elapsedTimeInSeconds } = playResponse;
@@ -159,9 +187,9 @@ const Earn = () => {
           console.error("Invalid play response", playResponse); // Tambahkan log jika respons tidak valid
         }
       };
-  
+
       updateUserData(); // Memanggil API `play` dan `getMe` tanpa mengubah state loading klaim
-  
+
       setIsClaimLoading(false); // Hentikan animasi loading klaim setelah klaim selesai
       setTimeout(() => setCanClaim(true), 5000); // Aktifkan kembali tombol klaim setelah 5 detik
     } catch (error) {
@@ -170,17 +198,12 @@ const Earn = () => {
       setCanClaim(true); // Aktifkan kembali tombol klaim
     }
   };
-  
-  
 
   useEffect(() => {
     if (dataMe) {
       setBalanceAirdrop(dataMe.points); // Update balance with points from backend
     }
   }, [dataMe]); // Re-run effect when dataMe changes
-
-
-
 
   const handleClick = (event) => {
     if (isClickDisabled) return; // Prevent clicks if clicking is disabled
@@ -235,7 +258,6 @@ const Earn = () => {
     }
   };
 
-
   const formatTime = (seconds) => {
     // Function to format time (seconds) into HH:MM:SS
     const secs = Math.floor(seconds); // Ensure seconds is an integer
@@ -245,14 +267,54 @@ const Earn = () => {
     return `${hrs.toString().padStart(2, "0")}:${mins
       .toString()
       .padStart(2, "0")}:${remainingSecs.toString().padStart(2, "0")}`; // Return formatted time string
-      
   };
-
 
   const handleClosePopup = () => {
     setShowPopup(false); // Hide the popup when the close button is clicked
   };
 
+  const handleConnectWalletClick = () => {
+    if (!walletAddress) {
+      setShowConnectWalletPopup(true);
+    }
+  };
+
+  const handleCloseConnectWalletPopup = () => {
+    setShowConnectWalletPopup(false);
+    setWalletAddress("");
+  };
+
+  const handleWalletAddressChange = (event) => {
+    setWalletAddress(event.target.value);
+  };
+
+  const handleConnectWallet = async () => {
+    if (walletAddress) {
+      try {
+        // Panggil fungsi connectWallet dari BackContext
+        const response = await connectWallet(walletAddress);
+
+        if (response && response.length > 0) {
+          // Jika respons berhasil dan data ada, simpan alamat wallet di state
+          setWalletAddress(walletAddress);
+          setShowConnectWalletPopup(false); // Tutup popup setelah wallet berhasil terhubung
+          console.log("Wallet connected successfully:", response);
+          // Anda bisa menambahkan logika tambahan di sini jika diperlukan
+        } else {
+          console.error("Failed to connect wallet. No data returned.");
+        }
+      } catch (error) {
+        console.error("Error connecting wallet:", error);
+      }
+    }
+  };
+
+  const formatWalletAddress = (address) => {
+    if (address.length > 9) {
+      return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    }
+    return address;
+  };
 
   // Jika masih loading, tampilkan animasi Lottie
   if (isInitialLoading) {
@@ -270,28 +332,32 @@ const Earn = () => {
 
   return (
     <div className="earn-sec bgs w-full flex flex-col justify-start items-center min-h-screen overflow-y-scroll relative my-5">
-        {/* Popup */}
+      {/* Popup */}
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center px-3">
           <div className="relative  rounded-lg shadow-lg p-1 w-screen justify-center items-center flex flex-col gap-4">
-            <button 
+            <button
               className="absolute top-2 right-2 text-white hover:text-gray-700"
               onClick={handleClosePopup}
             >
               <MdClose size={24} />
             </button>
-            <Image 
-              src="/NewFeature.jpg" 
-              alt="New Feature" 
-              width={400} 
-              height={400} 
+            <Image
+              src="/NewFeature.jpg"
+              alt="New Feature"
+              width={400}
+              height={400}
               className="rounded-md"
             />
-            <Link href="/main/claim" className="text-center text-white font-bold px-4 w-full py-5  but rounded-xl mb-3 ">Check out our New Feature!</Link>
+            <Link
+              href="/main/claim"
+              className="text-center text-white font-bold px-4 w-full py-5  but rounded-xl mb-3 "
+            >
+              Check out our New Feature!
+            </Link>
           </div>
         </div>
       )}
-
 
       {/* Render floating numbers for point addition visual feedback */}
       {floatingNumbers.map((num) => (
@@ -335,10 +401,19 @@ const Earn = () => {
             </button>
           </div>
           <div className="top-user w-[50%] flex items-center justify-end gap-2">
-            {/* Wallet button */}
-            <button className="gap-2 but p-4 flex justify-center items-center rounded-xl">
+            <button
+              className={`gap-2 but p-4 flex justify-center items-center rounded-xl ${
+                walletAddress ? "Disable" : ""
+              }`}
+              onClick={handleConnectWalletClick}
+              disabled={!!walletAddress}
+            >
               <IoWallet />
-              <p className="text-[12px]">walletAddress</p>
+              <p className=" text-[12px] ">
+                {walletAddress
+                  ? formatWalletAddress(walletAddress)
+                  : "Connect Wallet"}
+              </p>
             </button>
           </div>
         </div>
@@ -358,16 +433,14 @@ const Earn = () => {
             </div>
           </div>
           {/* Render NFT reward bonus */}
-          <div className="balance bgs flex flex-col justify-start items-start px-4 py-3 rounded-xl gap-2">
+          <div className="nft-reward-bonus bgs flex flex-col justify-start items-start px-4 py-3 rounded-xl gap-2">
             <p className="font-light text-[10px] text-gray-400">
               NFT Reward Bonus
             </p>
             <div className="wrap-level w-full flex justify-between items-center">
               <div className="wrap-icon-oin w-full flex justify-start items-start gap-2">
                 <p className="text-white text-[12px] font-bold">
-                  {nftRewardBonus.toLocaleString("en-US", {
-                    maximumFractionDigits: 2,
-                  })}
+                  {totalNftReward.toLocaleString(locale)}
                 </p>
               </div>
             </div>
@@ -414,7 +487,7 @@ const Earn = () => {
           </div>
         </div>
         {/* Render claim button */}
-         <button
+        <button
           className={`w-[330px] h-[55px] rounded-xl flex justify-center items-center mt-10 ${
             canClaim ? "but bg-blue-500" : "bg-gray-500 cursor-not-allowed"
           }`}
@@ -459,6 +532,44 @@ const Earn = () => {
           </div>
         </div>
       </div>
+      {showConnectWalletPopup && (
+        <div className="popup fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80 ">
+          <div className="popup-content bgs w-[350px] h-[360px] rounded-lg shadow-lg text-center flex flex-col p-3 gap-2 relative">
+            <button
+              className="close-icon absolute top-4 right-4 text-white text-2xl"
+              onClick={handleCloseConnectWalletPopup}
+            >
+              <MdClose />
+            </button>
+            <p className="mb-4 text-white font-bold text-lg mt-5">
+              Connect Your Wallet
+            </p>
+            <input
+              type="text"
+              placeholder="Enter your wallet address"
+              value={walletAddress}
+              onChange={handleWalletAddressChange}
+              className="bg-blue-950 w-[330px] h-[70px] p-5 rounded-lg text-[12px] mb-4"
+            />
+            <p className="text-xs italic text-red-500 font-extrabold">
+              Please enter your wallet address (BEP20) correctly,{" "}
+              <span className="text-xs italic text-white font-light">
+                your reward will send in your wallet address, We will not be
+                responsible if the wallet you entered is incorrect
+              </span>
+            </p>
+            <button
+              onClick={handleConnectWallet}
+              className={`but p-4 rounded-lg mt-8 ${
+                !walletAddress ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={!walletAddress}
+            >
+              Connect
+            </button>
+          </div>
+        </div>
+      )}
       <div className="py-3"></div>
     </div>
   );

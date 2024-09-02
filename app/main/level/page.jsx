@@ -9,7 +9,7 @@ import { dataLevel } from "@/lib/data";
 import { Player } from "@lottiefiles/react-lottie-player"; // Lottie Player
 
 const Level = () => {
-  const { dataMe, getMe, dataPlay, play } = useBackend();
+  const { dataMe, getMe, dataPlay, play, checkpoint, getCheckpoint } = useBackend();
   const [showLevelInfoPopup, setShowLevelInfoPopup] = useState(false);
   const [loading, setLoading] = useState(true); // Loading state for the page
 
@@ -17,8 +17,9 @@ const Level = () => {
     // Fetch data from backend and stop loading after data is fetched
     const fetchData = async () => {
       try {
-        await getMe();
-        await play();
+        await getMe(); // Fetch user data
+        await play(); // Fetch game session data
+        await getCheckpoint(); // Fetch checkpoint data from backend
         setLoading(false); // Stop loading when data is ready
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -146,7 +147,7 @@ const Level = () => {
   const renderCurrentLevelTasks = () => {
     const currentLevelData = dataLevel.find((levelData) => levelData.name === dataPlay?.levelName); // level dari backend
 
-    if (!currentLevelData || !dataMe) return null;
+    if (!currentLevelData || !dataMe || !checkpoint) return null;
 
     return (
       <div className="info1 gap-2 flex flex-col justify-start items-start">
@@ -159,11 +160,15 @@ const Level = () => {
         <ul className="info1-wrap list-disc list-inside flex flex-col justify-start items-start gap-2">
           {currentLevelData.totalCheckPoin && (
             <li className="font-regular text-[12px] flex justify-between items-center w-full gap-4">
-              <div>
-                Checkpoint 0/{currentLevelData.totalCheckPoin} (coming soon) {dataMe?.checkpointCount}
-              </div>
-              {(dataMe?.checkpointCount || 0) >= currentLevelData.totalCheckPoin ? <CompleteButton /> : <GoButton link="/main/claim" />}
-            </li>
+            <div>
+              Checkpoint {checkpoint?.checkpoint}/{currentLevelData.totalCheckPoin}
+            </div>
+            {checkpoint?.checkpoint >= currentLevelData.totalCheckPoin ? (
+              <CompleteButton />
+            ) : (
+              <GoButton link="/main/claim" />
+            )}
+          </li>
           )}
           {currentLevelData.minReferral && (
             <li className="font-regular text-[12px] flex justify-between items-center w-full">

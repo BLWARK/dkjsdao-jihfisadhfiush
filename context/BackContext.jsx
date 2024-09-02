@@ -17,6 +17,9 @@ export const BackProvider = ({ children }) => {
   const [task, setTask] = useState ();
   const [userTask, setUserTask] = useState ();
   const [checkpoint, setCheckpoint] = useState();  // State untuk menyimpan data checkpoint user
+  const [walletData, setWalletData] = useState();
+
+  
 
   const login = async ( userData ) => {
     const data = {
@@ -122,11 +125,19 @@ export const BackProvider = ({ children }) => {
   const taskList = async () => {
     try {
       const res = await customGet('api/v1/tasks');
+      
+      // Pastikan response mengandung data yang diharapkan
+      console.log("API Response:", res);
+      
       if (res?.tasks) {
         setTask(res.tasks);  // Simpan data tugas di state
+        return res;  // Return response for further use
+      } else {
+        console.error("No tasks data found in response");
+        return null;
       }
-    } catch (error){
-      console.log(error);
+    } catch (error) {
+      console.error("Error fetching task list:", error);
     }
   };
   
@@ -185,6 +196,48 @@ export const BackProvider = ({ children }) => {
       console.error("Error posting checkpoint:", error);
     }
   };
+
+  const connectWallet = async (walletAddress) => {
+    const data = {
+      walletAddress: walletAddress,
+    };
+  
+    try {
+      const res = await customPost('/api/v1/connect', data);
+      
+      if (res && res.length > 0) {
+        console.log("Connected wallet data:", res);
+        setWalletData(res);  // Simpan data di state walletData
+      } else {
+        console.error("No data returned from connect wallet API");
+      }
+  
+      return res;
+    } catch (error) {
+      console.error("Error connecting wallet:", error);
+    }
+  };
+  
+
+  const getMeNFT = async () => {
+    try {
+      const res = await customGet('/api/v1/me/nft');
+      if (res && res.length > 0) {
+        console.log("Me NFT data:", res);
+        return res;  // Return the NFT data for further use
+      } else {
+        console.error("No NFT data returned from API");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching meNFT data:", error);
+      return null;
+    }
+  };
+  
+  
+
+
   
 
   return (
@@ -202,6 +255,9 @@ export const BackProvider = ({ children }) => {
         useTask,
         getCheckpoint,  // Ekspos fungsi getCheckpoint
         postCheckpoint, // Ekspos fungsi postCheckpoint
+        connectWallet,  // Ekspos fungsi connectWallet
+        getMeNFT,  // Ekspos fungsi getMeNFT
+        walletData,  // Ekspos state walletData
         task,
         userTask,
         checkpoint,  // Ekspos state checkpoint
