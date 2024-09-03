@@ -4,65 +4,66 @@ import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { Player } from "@lottiefiles/react-lottie-player"; // Lottie Player
 import { IoWallet, IoTimer } from "react-icons/io5";
+import { FaCheckCircle } from "react-icons/fa";
 import { MdOutlineKeyboardArrowRight, MdClose } from "react-icons/md";
 import { useGlobalState } from "@/context/GlobalStateContext";
 import { useBackend } from "@/context/BackContext";
+import { TiWarning } from "react-icons/ti";
 import CoinImage from "@/public/Coins1.png";
 
 const Earn = () => {
   const {
-    setBalance, // Function to update balance
-    balanceAirdrop, // Global state for balance airdrop
-    setBalanceAirdrop, // Function to update balance airdrop
-    timer, // Global state for timer
-    setTimer, // Function to update timer
-    canClaim, // Global state to determine if the user can claim points
-    setCanClaim, // Function to set whether the user can claim points
-    setClaimableCoins, // Function to set claimable coins (points)
-    perSecondEarn, // Global state for earning rate per second
-    nftRewardBonus, // Global state for NFT reward bonus
+    setBalance, 
+    balanceAirdrop,
+    setBalanceAirdrop,
+    timer,
+    setTimer,
+    canClaim,
+    setCanClaim,
+    setClaimableCoins,
+    nftRewardBonus,
   } = useGlobalState();
 
   const {
-    dataMe, // Data retrieved from backend (e.g. user data)
-    getMe, // Function to fetch user data
-    dataPlay, // Data for game play session from backend
-    play, // Function to initiate or continue a game session
-    claimPoint, // Function to claim points
-    click, // Function to handle click interactions with backend
+    dataMe, 
+    getMe, 
+    dataPlay, 
+    play, 
+    claimPoint, 
+    click, 
     connectWallet,
     getMeNFT,
   } = useBackend();
 
-  const [floatingNumbers, setFloatingNumbers] = useState([]); // Local state to manage floating numbers for visual feedback
-  const [coinClicked, setCoinClicked] = useState(false); // State to trigger coin-click animation
-  const [tapTrails, setTapTrails] = useState([]); // State to track tap trails for visual effects
-  const [isLoading, setIsLoading] = useState(false); // Loading state for when a claim is being processed
-  const [lastClickTime, setLastClickTime] = useState(0); // Track the last time a click was registered
-  const [clickDelay, setClickDelay] = useState(false); // State for delaying click actions
-  const [unclaimedPoints, setUnclaimedPoints] = useState(0); // State for unclaimed points
-  const [isClickDisabled, setIsClickDisabled] = useState(false); // State to disable clicks during certain conditions
-  const [coinAdded, setCoinAdded] = useState(false); // State to trigger animation when coins/points are added
-  const [isInitialLoading, setIsInitialLoading] = useState(true); // State for initial loading
-  const [isClaimLoading, setIsClaimLoading] = useState(false); // State for claim loading
-  const [clickCount, setClickCount] = useState(0); // State to track click count
-  const [showPopup, setShowPopup] = useState(false); // State for controlling popup
+  const [floatingNumbers, setFloatingNumbers] = useState([]);
+  const [coinClicked, setCoinClicked] = useState(false);
+  const [tapTrails, setTapTrails] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastClickTime, setLastClickTime] = useState(0);
+  const [clickDelay, setClickDelay] = useState(false);
+  const [unclaimedPoints, setUnclaimedPoints] = useState(0);
+  const [isClickDisabled, setIsClickDisabled] = useState(false);
+  const [coinAdded, setCoinAdded] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isClaimLoading, setIsClaimLoading] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
   const [showConnectWalletPopup, setShowConnectWalletPopup] = useState(false);
   const [walletAddress, setWalletAddress] = useState();
-  const [totalNftReward, setTotalNftReward] = useState(0); // State untuk total NFT reward
+  const [walletStatus, setWalletStatus] = useState(null);
+  
   const locale = "en-US";
 
-  const playCalled = useRef(false); // Ref to ensure play is only called once
+  const playCalled = useRef(false);
 
   useEffect(() => {
     const popupShown = localStorage.getItem("popupShown");
     if (!popupShown) {
-      setShowPopup(true); // Show popup if it hasn't been shown before
-      localStorage.setItem("popupShown", "true"); // Set it so it won't show again
+      setShowPopup(true);
+      localStorage.setItem("popupShown", "true");
     }
   }, []);
 
-  // Tambahkan state untuk memeriksa apakah data sedang di-load
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -80,9 +81,9 @@ const Earn = () => {
         if (playData) {
           setClaimableCoins(playData.unclaimedPoints);
           setTimer(3600 - playData.elapsedTimeInSeconds);
+          // perSecondEarn langsung digunakan dari playData tanpa disimpan dalam state global
         }
 
-        // Hanya set loading ke false jika userData dan playData sudah ada
         setIsInitialLoading(false);
       } catch (error) {
         console.error("Error initializing data:", error);
@@ -98,179 +99,153 @@ const Earn = () => {
 
   useEffect(() => {
     if (dataMe && dataMe.walletAddress) {
-      setWalletAddress(dataMe.walletAddress); // Set wallet address dari dataMe
+      setWalletAddress(dataMe.walletAddress);
     }
   }, [dataMe]);
 
   useEffect(() => {
-    const fetchNftRewards = async () => {
-      try {
-        const nftData = await getMeNFT(); // Panggil API getMeNFT
-
-        if (nftData) {
-          const totalRewardCalc = nftData.reduce(
-            (acc, nft) => acc + (nft.reward || 0),
-            0
-          );
-          setTotalNftReward(totalRewardCalc); // Simpan total reward ke state
-        }
-      } catch (error) {
-        console.error("Error fetching NFT data:", error);
-      }
-    };
-
-    fetchNftRewards(); // Panggil fungsi untuk mengambil dan menghitung reward NFT
-  }, []);
-
-  useEffect(() => {
-    // Effect to update timer and manage countdown for game session
     if (dataPlay) {
       const { elapsedTimeInSeconds } = dataPlay;
-      setTimer(Math.floor(3600 - elapsedTimeInSeconds)); // Sync timer with backend data
+      setTimer(Math.floor(3600 - elapsedTimeInSeconds)); 
 
       const interval = setInterval(() => {
-        setTimer((prev) => (prev > 0 ? Math.floor(prev - 1) : 0)); // Decrease the timer every second
+        setTimer((prev) => (prev > 0 ? Math.floor(prev - 1) : 0));
       }, 1000);
 
-      return () => clearInterval(interval); // Clean up interval when component unmounts or dataPlay changes
+      return () => clearInterval(interval);
     }
-  }, [dataPlay]); // Re-run effect whenever dataPlay changes
+  }, [dataPlay]);
 
   useEffect(() => {
-    // Effect to increase unclaimed points every second during the game session
     if (dataPlay) {
-      setCanClaim(true); // Allow user to claim points
-      setUnclaimedPoints(dataPlay?.unclaimedPoints || 0); // Set unclaimed points from backend
+      setCanClaim(true);
+      setUnclaimedPoints(dataPlay?.unclaimedPoints || 0);
 
       const interval = setInterval(() => {
         if (dataPlay?.elapsedTimeInSeconds < 3600) {
-          setUnclaimedPoints((prev) => prev + dataPlay?.perSecondEarn); // Increment unclaimed points every second
+          setUnclaimedPoints((prev) => prev + dataPlay?.perSecondEarn); 
         }
       }, 1000);
 
       if (dataPlay?.elapsedTimeInSeconds >= 3600) {
-        clearInterval(interval); // Stop interval when maximum elapsed time is reached
+        clearInterval(interval);
       }
 
-      return () => clearInterval(interval); // Clean up interval when component unmounts or dataPlay changes
+      return () => clearInterval(interval);
     }
-  }, [dataPlay]); // Re-run effect whenever dataPlay changes
+  }, [dataPlay]);
 
   const handleClaim = async () => {
     try {
-      setIsClaimLoading(true); // Set animasi loading klaim
-      setCanClaim(false); // Disable tombol klaim
+      setIsClaimLoading(true);
+      setCanClaim(false);
 
       if (unclaimedPoints <= 0) {
         console.warn("No points to claim.");
-        setIsClaimLoading(false); // Hentikan animasi loading klaim
-        setCanClaim(true); // Aktifkan kembali tombol klaim
+        setIsClaimLoading(false);
+        setCanClaim(true);
         return;
       }
 
-      const claimResponse = await claimPoint(); // Lakukan klaim
+      const claimResponse = await claimPoint();
       console.log("Claim Response:", claimResponse);
 
-      // Lanjutkan tanpa mengubah status loading klaim
       const updateUserData = async () => {
-        await getMe(); // Refresh data user
+        await getMe(); 
 
-        // Dapatkan respons dari play dan cek jika data valid
-        const playResponse = await play(); // Lanjutkan atau mulai sesi baru
+        const playResponse = await play();
 
-        // Pastikan playResponse valid sebelum destruktur
         if (playResponse && playResponse.elapsedTimeInSeconds !== undefined) {
           const { elapsedTimeInSeconds } = playResponse;
-          setTimer(3600 - elapsedTimeInSeconds); // Reset timer
-          setUnclaimedPoints(0); // Reset poin yang belum diklaim
+          setTimer(3600 - elapsedTimeInSeconds); 
+          setUnclaimedPoints(0);
         } else {
-          console.error("Invalid play response", playResponse); // Tambahkan log jika respons tidak valid
+          console.error("Invalid play response", playResponse);
         }
       };
 
-      updateUserData(); // Memanggil API `play` dan `getMe` tanpa mengubah state loading klaim
+      updateUserData(); 
 
-      setIsClaimLoading(false); // Hentikan animasi loading klaim setelah klaim selesai
-      setTimeout(() => setCanClaim(true), 5000); // Aktifkan kembali tombol klaim setelah 5 detik
+      setIsClaimLoading(false);
+      setTimeout(() => setCanClaim(true), 5000);
     } catch (error) {
       console.error("Error in handleClaim:", error);
-      setIsClaimLoading(false); // Hentikan animasi loading klaim jika terjadi error
-      setCanClaim(true); // Aktifkan kembali tombol klaim
+      setIsClaimLoading(false);
+      setCanClaim(true);
     }
   };
 
   useEffect(() => {
     if (dataMe) {
-      setBalanceAirdrop(dataMe.points); // Update balance with points from backend
+      setBalanceAirdrop(dataMe.points);
     }
-  }, [dataMe]); // Re-run effect when dataMe changes
+  }, [dataMe]);
 
   const handleClick = (event) => {
-    if (isClickDisabled) return; // Prevent clicks if clicking is disabled
+    if (isClickDisabled) return;
 
-    const currentTime = Date.now(); // Get current time
-    if (currentTime - lastClickTime < 10) return; // Prevent multiple clicks within a very short time
-    setLastClickTime(currentTime); // Update the last click time
+    const currentTime = Date.now();
+    if (currentTime - lastClickTime < 10) return;
+    setLastClickTime(currentTime);
 
-    setClickCount((prevCount) => prevCount + 1); // Increment click count locally
+    setClickCount((prevCount) => prevCount + 1);
 
     if (unclaimedPoints > 0) {
-      const valueToAdd = perSecondEarn; // Remove the division by 1000
+      const valueToAdd = dataPlay?.perSecondEarn; // Langsung ambil dari dataPlay
 
-      setBalance((prev) => prev + valueToAdd); // Update balance
-      setBalanceAirdrop((prev) => prev + valueToAdd); // Update balance airdrop
-      setUnclaimedPoints((prev) => Math.max(prev - valueToAdd, 0)); // Decrease unclaimed points
-      setTimer((prev) => Math.min(prev + 1, 3600)); // Increment timer, but not beyond 3600 seconds
-      setClaimableCoins((prev) => prev + valueToAdd); // Update claimable points
+      setBalance((prev) => prev + valueToAdd);
+      setBalanceAirdrop((prev) => prev + valueToAdd);
+      setUnclaimedPoints((prev) => Math.max(prev - valueToAdd, 0));
+      setTimer((prev) => Math.min(prev + 1, 3600));
+      setClaimableCoins((prev) => prev + valueToAdd);
 
-      setCoinAdded(true); // Trigger coin addition animation
+      setCoinAdded(true);
 
-      const { clientX, clientY } = event; // Get the click position
-      const id = Date.now(); // Generate a unique ID based on the current time
+      const { clientX, clientY } = event;
+      const id = Date.now();
       setFloatingNumbers((prev) => [
         ...prev,
-        { id, value: valueToAdd.toFixed(6), x: clientX, y: clientY }, // Add floating number for visual feedback
+        { id, value: valueToAdd.toFixed(6), x: clientX, y: clientY },
       ]);
-      setTapTrails((prev) => [...prev, { id, x: clientX, y: clientY }]); // Add tap trail for visual feedback
-      setCoinClicked(true); // Trigger coin click animation
-      setTimeout(() => setCoinClicked(false), 50); // Reset coin click animation after a short time
+      setTapTrails((prev) => [...prev, { id, x: clientX, y: clientY }]);
+      setCoinClicked(true);
+      setTimeout(() => setCoinClicked(false), 50);
 
       setTimeout(() => {
-        setFloatingNumbers((prev) => prev.filter((num) => num.id !== id)); // Remove floating number after 2 seconds
-        setTapTrails((prev) => prev.filter((trail) => trail.id !== id)); // Remove tap trail after 2 seconds
+        setFloatingNumbers((prev) => prev.filter((num) => num.id !== id));
+        setTapTrails((prev) => prev.filter((trail) => trail.id !== id));
       }, 2000);
 
-      clearTimeout(clickDelay); // Clear the previous click delay timeout
+      clearTimeout(clickDelay);
       const newDelay = setTimeout(async () => {
         try {
-          await click({ clickCount }); // Send the total click count to backend
-          setClickCount(0); // Reset the click count after sending to backend
+          await click({ clickCount });
+          setClickCount(0);
         } catch (error) {
-          console.error("Error during click:", error); // Log any click-related errors
+          console.error("Error during click:", error);
         }
-      }, 2000); // Send clicks to backend after 2 seconds of inactivity
-      setClickDelay(newDelay); // Set new click delay timeout
+      }, 2000);
+      setClickDelay(newDelay);
 
-      setTimeout(() => setCoinAdded(false), 300); // Reset coin addition animation after 0.3 seconds
+      setTimeout(() => setCoinAdded(false), 300);
     } else {
-      setIsClickDisabled(true); // Disable further clicks for 3 seconds
-      setTimeout(() => setIsClickDisabled(false), 3000); // Re-enable clicking after 3 seconds
+      setIsClickDisabled(true);
+      setTimeout(() => setIsClickDisabled(false), 3000);
     }
   };
 
   const formatTime = (seconds) => {
-    // Function to format time (seconds) into HH:MM:SS
-    const secs = Math.floor(seconds); // Ensure seconds is an integer
-    const hrs = Math.floor(secs / 3600); // Calculate hours
-    const mins = Math.floor((secs % 3600) / 60); // Calculate minutes
-    const remainingSecs = secs % 60; // Calculate remaining seconds
+    const secs = Math.floor(seconds);
+    const hrs = Math.floor(secs / 3600);
+    const mins = Math.floor((secs % 3600) / 60);
+    const remainingSecs = secs % 60;
     return `${hrs.toString().padStart(2, "0")}:${mins
       .toString()
-      .padStart(2, "0")}:${remainingSecs.toString().padStart(2, "0")}`; // Return formatted time string
+      .padStart(2, "0")}:${remainingSecs.toString().padStart(2, "0")}`;
   };
 
   const handleClosePopup = () => {
-    setShowPopup(false); // Hide the popup when the close button is clicked
+    setShowPopup(false);
   };
 
   const handleConnectWalletClick = () => {
@@ -291,22 +266,24 @@ const Earn = () => {
   const handleConnectWallet = async () => {
     if (walletAddress) {
       try {
-        // Panggil fungsi connectWallet dari BackContext
         const response = await connectWallet(walletAddress);
 
         if (response && response.length > 0) {
-          // Jika respons berhasil dan data ada, simpan alamat wallet di state
+          setWalletStatus('success');
           setWalletAddress(walletAddress);
-          setShowConnectWalletPopup(false); // Tutup popup setelah wallet berhasil terhubung
-          console.log("Wallet connected successfully:", response);
-          // Anda bisa menambahkan logika tambahan di sini jika diperlukan
+          setShowConnectWalletPopup(false);
         } else {
-          console.error("Failed to connect wallet. No data returned.");
+          setWalletStatus('error');
         }
       } catch (error) {
         console.error("Error connecting wallet:", error);
+        setWalletStatus('error');
       }
     }
+  };
+
+  const handleCloseWalletStatusPopup = () => {
+    setWalletStatus(null);
   };
 
   const formatWalletAddress = (address) => {
@@ -316,14 +293,13 @@ const Earn = () => {
     return address;
   };
 
-  // Jika masih loading, tampilkan animasi Lottie
   if (isInitialLoading) {
     return (
       <div className="loading-screen flex justify-center items-center h-screen">
         <Player
           autoplay
           loop
-          src="https://lottie.host/16594a2c-c2ad-4196-98e2-51ab691a2e8d/ycygvL2itD.json" // Link animasi Lottie
+          src="https://lottie.host/16594a2c-c2ad-4196-98e2-51ab691a2e8d/ycygvL2itD.json"
           style={{ height: "150px", width: "150px" }}
         />
       </div>
@@ -381,11 +357,9 @@ const Earn = () => {
         <div className="top-sec w-full flex justify-between items-center">
           <div className="top-user w-[60%] flex items-center justify-start gap-2">
             <button className="gap-2 px-2 flex flex-col justify-start items-start">
-              {/* Render user's username */}
               <p className="text-[12px] font-bold">
                 Hi, {dataMe ? dataMe?.firstName : "loading"}
               </p>
-              {/* Link to user's level */}
               <Link
                 href="/main/level"
                 className="flex justify-start items-center text-blue-400"
@@ -419,7 +393,6 @@ const Earn = () => {
         </div>
 
         <div className="level-sec w-full grid grid-cols-2 justify-between items-center mt-4 gap-4">
-          {/* Render profit per hour */}
           <div className="balance bgs flex flex-col justify-start items-start px-4 py-3 rounded-xl gap-2">
             <p className="font-light text-[10px] text-gray-400">
               Profit per hour
@@ -427,12 +400,11 @@ const Earn = () => {
             <div className="wrap-level w-full flex justify-between items-center">
               <div className="wrap-icon-coin w-full flex justify-start items-start gap-2">
                 <p className="text-white text-[12px] font-bold">
-                  {dataPlay?.perHourEarn}
+                  {dataPlay?.perHourEarn.toLocaleString(locale)}
                 </p>
               </div>
             </div>
           </div>
-          {/* Render NFT reward bonus */}
           <div className="nft-reward-bonus bgs flex flex-col justify-start items-start px-4 py-3 rounded-xl gap-2">
             <p className="font-light text-[10px] text-gray-400">
               NFT Reward Bonus
@@ -440,13 +412,12 @@ const Earn = () => {
             <div className="wrap-level w-full flex justify-between items-center">
               <div className="wrap-icon-oin w-full flex justify-start items-start gap-2">
                 <p className="text-white text-[12px] font-bold">
-                  {dataUser?.nftRewardBonus}
+                  {dataMe?.nftRewardBonus.toLocaleString(locale)}
                 </p>
               </div>
             </div>
           </div>
         </div>
-        {/* Render total balance */}
         <div className="balance flex flex-col justify-start items-start mt-7 gap-4">
           <div className="wrap-total-balance w-full flex justify-between items-center">
             <div
@@ -469,7 +440,6 @@ const Earn = () => {
             </div>
           </div>
         </div>
-        {/* Render coin tap section */}
         <div
           className="wrap-coin-sec w-full flex flex-col justify-center items-center px-14 py-5"
           onClick={handleClick}
@@ -486,7 +456,6 @@ const Earn = () => {
             />
           </div>
         </div>
-        {/* Render claim button */}
         <button
           className={`w-[330px] h-[55px] rounded-xl flex justify-center items-center mt-10 ${
             canClaim ? "but bg-blue-500" : "bg-gray-500 cursor-not-allowed"
@@ -517,7 +486,6 @@ const Earn = () => {
           </div>
         </button>
 
-        {/* Render banner image */}
         <div className="wrap-coin-sec w-full flex flex-col justify-center items-center rounded-2xl mt-8 mb-28">
           <div className="img-warp w-[500] h-[200] object-contain">
             <Image
@@ -567,6 +535,25 @@ const Earn = () => {
             >
               Connect
             </button>
+          </div>
+        </div>
+      )}
+
+      {walletStatus === 'success' && (
+         <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center">
+         <div className="bgs flex gap-5 flex-col w-[340px] h-[300px] rounded-lg text-center justify-center items-center">
+           <div className="text-green-500 text-[120px]"><FaCheckCircle /></div>
+           <h3 className=" font-bold mb-3">Wallet successfully connected!</h3>
+           <button onClick={handleCloseWalletStatusPopup} className="but w-[80%] bg-blue-500 px-4 py-2 rounded-lg">Close</button>
+         </div>
+       </div>
+      )}
+      {walletStatus === 'error' && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center">
+          <div className="bgs flex gap-5 flex-col w-[340px] h-[300px] rounded-lg text-center justify-center items-center">
+            <div className="text-red-500 text-[120px]"><TiWarning /></div>
+            <h3 className=" font-bold mb-3">Wallet already connected in another account!</h3>
+            <button onClick={handleCloseWalletStatusPopup} className="but w-[80%] bg-blue-500 px-4 py-2 rounded-lg">Close</button>
           </div>
         </div>
       )}

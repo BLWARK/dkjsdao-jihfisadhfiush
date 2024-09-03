@@ -27,6 +27,7 @@ const Claim = () => {
   const [canClaim, setCanClaim] = useState(false);
   const [taskStarted, setTaskStarted] = useState(false);
   const [taskCompletionPercentage, setTaskCompletionPercentage] = useState(0); // State untuk menyimpan persentase selesai tugas
+  const [userTasksCompleted, setUserTasksCompleted] = useState(0);
 
   const refreshPage = () => {
     window.location.reload(); // Fungsi untuk merefresh halaman
@@ -39,11 +40,9 @@ const Claim = () => {
         
         // Tambahkan console log untuk memastikan data diterima
         console.log("Task Data from API:", taskData);
-  
-        if (taskData?.tasks) {
-          console.log("Task List:", taskData.tasks);
-        } else {
-          console.error("No tasks found in API response");
+
+        if (taskData?.userTasks) {
+          setUserTasksCompleted(taskData.userTasks); // Set nilai userTasksCompleted dari API
         }
   
         const checkpointData = await getCheckpoint(); // Memuat data checkpoint
@@ -146,6 +145,13 @@ const Claim = () => {
     }
   };
 
+  const updateTaskCompletion = async () => {
+    const taskData = await taskList(); // Memuat ulang daftar tugas
+    if (taskData?.userTasks) {
+      setUserTasksCompleted(taskData.userTasks); // Perbarui nilai userTasksCompleted setelah tugas selesai
+    }
+  };
+
   const handleCheckpoint = async () => {
     try {
       if (checkpointDone) {
@@ -212,6 +218,14 @@ const Claim = () => {
           <div className="wrap-icon-coin w-full flex justify-center items-center gap-2">
             <Image src="/Coins.png" alt="Logo" width={30} height={30} />
             <p className='font-bold text-[24px] text-white text-right'>{checkpoint?.userPoints?.toFixed(2)}</p>
+          </div>
+        </div>
+
+        <div className="wrap-task-complete bgs w-full flex flex-col justify-center items-center  py-5 rounded-xl gap-2">
+          <p className="font-bold text-[14px] text-white">Total Task Completed</p>
+          <div className="wrap-icon-coin w-full flex justify-center items-center gap-2">
+            
+            <p className='font-bold text-[20px] text-white text-right'>{userTasksCompleted}</p>
           </div>
         </div>
 
@@ -378,8 +392,8 @@ const Claim = () => {
             <p className="text-white mb-2">Your task has been completed.</p>
             <button className="but py-2 px-4 rounded-lg w-full" onClick={async () => {
               setShowSuccessPopup(false);
-              await taskList();  // Memuat ulang task list
-              await getCheckpoint();  // Memuat ulang checkpoint
+              await updateTaskCompletion(); // Perbarui jumlah tugas selesai setelah menekan OK
+              await getCheckpoint(); 
             }}>
               OK
             </button>
