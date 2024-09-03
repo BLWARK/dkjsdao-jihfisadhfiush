@@ -440,7 +440,7 @@ const Earn = () => {
             <div className="wrap-level w-full flex justify-between items-center">
               <div className="wrap-icon-oin w-full flex justify-start items-start gap-2">
                 <p className="text-white text-[12px] font-bold">
-                  {totalNftReward.toLocaleString(locale)}
+                  {dataUser?.nftRewardBonus}
                 </p>
               </div>
             </div>
