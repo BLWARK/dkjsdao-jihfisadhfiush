@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from 'react';
 import { IoIosArrowForward } from "react-icons/io";
 import { FaCheck } from "react-icons/fa";
@@ -7,8 +6,6 @@ import { MdClose } from "react-icons/md";
 import { useGlobalState } from "@/context/GlobalStateContext";
 import { useBackend } from "@/context/BackContext";  
 import { Player } from '@lottiefiles/react-lottie-player';
-import { IoReload } from "react-icons/io5"; // Import ikon refresh
-import { IoMdRefresh } from "react-icons/io";
 import Image from "next/image";
 
 const Claim = () => {
@@ -26,7 +23,7 @@ const Claim = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [canClaim, setCanClaim] = useState(false);
   const [taskStarted, setTaskStarted] = useState(false);
-  const [taskCompletionPercentage, setTaskCompletionPercentage] = useState(0); // State untuk menyimpan persentase selesai tugas
+  const [taskCompletionPercentage, setTaskCompletionPercentage] = useState(0); 
   const [userTasksCompleted, setUserTasksCompleted] = useState(0);
 
   const refreshPage = () => {
@@ -192,15 +189,10 @@ const Claim = () => {
     }
   };
   
-  
-
   const dailyTasks = task?.filter(task => task.type === 'daily');
   const oneTimeTasks = task?.filter(task => task.type === 'one-time');
   const specialTasks = task?.filter(task => task.type === 'special');
 
-
-
-  
   return (
     <div className="invite-sec w-full flex flex-col justify-start items-center h-[1200px] overflow-y-scroll bgs">
       <div className="wrap-invite w-full mb-32 px-4 flex flex-col justify-center items-center mt-5">
@@ -224,7 +216,6 @@ const Claim = () => {
         <div className="wrap-task-complete bgs w-full flex flex-col justify-center items-center  py-5 rounded-xl gap-2">
           <p className="font-bold text-[14px] text-white">Total Task Completed</p>
           <div className="wrap-icon-coin w-full flex justify-center items-center gap-2">
-            
             <p className='font-bold text-[20px] text-white text-right'>{userTasksCompleted}</p>
           </div>
         </div>

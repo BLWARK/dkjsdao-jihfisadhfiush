@@ -6,6 +6,7 @@ import { Player } from "@lottiefiles/react-lottie-player"; // Lottie Player
 import { IoWallet, IoTimer } from "react-icons/io5";
 import { FaCheckCircle } from "react-icons/fa";
 import { MdOutlineKeyboardArrowRight, MdClose } from "react-icons/md";
+import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { useGlobalState } from "@/context/GlobalStateContext";
 import { useBackend } from "@/context/BackContext";
 import { TiWarning } from "react-icons/ti";
@@ -13,7 +14,7 @@ import CoinImage from "@/public/Coins1.png";
 
 const Earn = () => {
   const {
-    setBalance, 
+    setBalance,
     balanceAirdrop,
     setBalanceAirdrop,
     timer,
@@ -25,12 +26,12 @@ const Earn = () => {
   } = useGlobalState();
 
   const {
-    dataMe, 
-    getMe, 
-    dataPlay, 
-    play, 
-    claimPoint, 
-    click, 
+    dataMe,
+    getMe,
+    dataPlay,
+    play,
+    claimPoint,
+    click,
     connectWallet,
     getMeNFT,
   } = useBackend();
@@ -51,7 +52,8 @@ const Earn = () => {
   const [showConnectWalletPopup, setShowConnectWalletPopup] = useState(false);
   const [walletAddress, setWalletAddress] = useState();
   const [walletStatus, setWalletStatus] = useState(null);
-  
+  const [showInvalidWalletPopup, setShowInvalidWalletPopup] = useState(false);
+
   const locale = "en-US";
 
   const playCalled = useRef(false);
@@ -106,7 +108,7 @@ const Earn = () => {
   useEffect(() => {
     if (dataPlay) {
       const { elapsedTimeInSeconds } = dataPlay;
-      setTimer(Math.floor(3600 - elapsedTimeInSeconds)); 
+      setTimer(Math.floor(3600 - elapsedTimeInSeconds));
 
       const interval = setInterval(() => {
         setTimer((prev) => (prev > 0 ? Math.floor(prev - 1) : 0));
@@ -123,7 +125,7 @@ const Earn = () => {
 
       const interval = setInterval(() => {
         if (dataPlay?.elapsedTimeInSeconds < 3600) {
-          setUnclaimedPoints((prev) => prev + dataPlay?.perSecondEarn); 
+          setUnclaimedPoints((prev) => prev + dataPlay?.perSecondEarn);
         }
       }, 1000);
 
@@ -151,20 +153,20 @@ const Earn = () => {
       console.log("Claim Response:", claimResponse);
 
       const updateUserData = async () => {
-        await getMe(); 
+        await getMe();
 
         const playResponse = await play();
 
         if (playResponse && playResponse.elapsedTimeInSeconds !== undefined) {
           const { elapsedTimeInSeconds } = playResponse;
-          setTimer(3600 - elapsedTimeInSeconds); 
+          setTimer(3600 - elapsedTimeInSeconds);
           setUnclaimedPoints(0);
         } else {
           console.error("Invalid play response", playResponse);
         }
       };
 
-      updateUserData(); 
+      updateUserData();
 
       setIsClaimLoading(false);
       setTimeout(() => setCanClaim(true), 5000);
@@ -263,21 +265,42 @@ const Earn = () => {
     setWalletAddress(event.target.value);
   };
 
+  const isValidBEP20Address = (address) => {
+    // Cek apakah alamat diawali dengan "0x" dan panjangnya 42 karakter
+    const isValidLength = address.length === 42;
+    const hasValidPrefix = address.startsWith("0x");
+    const isHex = /^[0-9a-fA-F]+$/.test(address.slice(2));
+
+    return isValidLength && hasValidPrefix && isHex;
+  };
+
   const handleConnectWallet = async () => {
     if (walletAddress) {
+      // Validasi awal untuk memastikan alamat BEP20 yang valid
+      if (!isValidBEP20Address(walletAddress)) {
+        setWalletStatus("error");
+        setShowInvalidWalletPopup(true); // Menampilkan popup jika alamat tidak valid
+        return;
+      }
+
       try {
+        // Memanggil API untuk menghubungkan wallet
         const response = await connectWallet(walletAddress);
 
-        if (response && response.length > 0) {
-          setWalletStatus('success');
-          setWalletAddress(walletAddress);
-          setShowConnectWalletPopup(false);
+        // Cek jika respons dari API adalah status 500
+        if (response.status === 500) {
+          setWalletStatus("error");
+          console.error("API Error: Server error (500)");
         } else {
-          setWalletStatus('error');
+          // Jika pemanggilan API berhasil (status tidak 500)
+          setWalletStatus("success");
+          setWalletAddress(walletAddress);
+          setShowConnectWalletPopup(false); // Menutup popup jika berhasil
         }
       } catch (error) {
+        // Penanganan kesalahan jaringan atau server
         console.error("Error connecting wallet:", error);
-        setWalletStatus('error');
+        setWalletStatus("error");
       }
     }
   };
@@ -502,14 +525,14 @@ const Earn = () => {
       </div>
       {showConnectWalletPopup && (
         <div className="popup fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80 ">
-          <div className="popup-content bgs w-[350px] h-[360px] rounded-lg shadow-lg text-center flex flex-col p-3 gap-2 relative">
+          <div className="popup-content bgs w-[350px] h-[400px] rounded-lg shadow-lg text-center flex flex-col p-3 gap-2 relative">
             <button
               className="close-icon absolute top-4 right-4 text-white text-2xl"
               onClick={handleCloseConnectWalletPopup}
             >
               <MdClose />
             </button>
-            <p className="mb-4 text-white font-bold text-lg mt-5">
+            <p className="mb-4 text-white font-bold text-xl mt-5">
               Connect Your Wallet
             </p>
             <input
@@ -519,13 +542,30 @@ const Earn = () => {
               onChange={handleWalletAddressChange}
               className="bg-blue-950 w-[330px] h-[70px] p-5 rounded-lg text-[12px] mb-4"
             />
-            <p className="text-xs italic text-red-500 font-extrabold">
+            <p className="text-[12px] italic text-red-500 font-extrabold">
               Please enter your wallet address (BEP20) correctly,{" "}
-              <span className="text-xs italic text-white font-light">
-                your reward will send in your wallet address, We will not be
-                responsible if the wallet you entered is incorrect
-              </span>
+              <div className="flex flex-col justify-center items-center text-center mt-1">
+                <span className=" text-[11px] italic text-red-500 font-light">
+                  Your NFTs and rewards will send in your wallet address,
+                </span>
+                <span className=" text-[11px] italic text-red-500 font-light">
+                  We will not be responsible if the wallet you entered is
+                  incorrect
+                </span>
+              </div>
             </p>
+            <Link
+              href="https://youtube.com"
+              target="/blank"
+              className="italic underline text-blue-400 text-[12px] mt-2 flex justify-center items-center gap-2"
+            >
+              {" "}
+              <span className="text-[14px]">
+                <AiOutlineQuestionCircle />
+              </span>
+              How to Create BEP20 wallet?
+            </Link>
+
             <button
               onClick={handleConnectWallet}
               className={`but p-4 rounded-lg mt-8 ${
@@ -539,24 +579,51 @@ const Earn = () => {
         </div>
       )}
 
-      {walletStatus === 'success' && (
-         <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center">
-         <div className="bgs flex gap-5 flex-col w-[340px] h-[300px] rounded-lg text-center justify-center items-center">
-           <div className="text-green-500 text-[120px]"><FaCheckCircle /></div>
-           <h3 className=" font-bold mb-3">Wallet successfully connected!</h3>
-           <button onClick={handleCloseWalletStatusPopup} className="but w-[80%] bg-blue-500 px-4 py-2 rounded-lg">Close</button>
-         </div>
-       </div>
-      )}
-      {walletStatus === 'error' && (
+      {walletStatus === "success" && (
         <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center">
-          <div className="bgs flex gap-5 flex-col w-[340px] h-[300px] rounded-lg text-center justify-center items-center">
-            <div className="text-red-500 text-[120px]"><TiWarning /></div>
-            <h3 className=" font-bold mb-3">Wallet already connected in another account!</h3>
-            <button onClick={handleCloseWalletStatusPopup} className="but w-[80%] bg-blue-500 px-4 py-2 rounded-lg">Close</button>
+          <div className="bgs flex gap-5 flex-col w-[340px] h-[320px] rounded-lg text-center justify-center items-center">
+            <div className="text-green-500 text-[120px] ">
+              <FaCheckCircle />
+            </div>
+            <h3 className=" font-bold mb-3">Wallet successfully connected!</h3>
+            <button
+              onClick={handleCloseWalletStatusPopup}
+              className="but w-[80%] bg-blue-500 px-4 py-2 rounded-lg"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
+      {(walletStatus === "error" || showInvalidWalletPopup) && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center">
+          <div className="bgs flex gap-2 flex-col w-[340px] h-[340px] rounded-lg text-center justify-center items-center">
+            <div className="text-red-500 text-[120px]">
+              <TiWarning />
+            </div>
+            <h3 className="font-bold text-red-500 ">
+              {showInvalidWalletPopup
+                ? "Invalid Wallet Address"
+                : "Wallet already connected in another account!"}
+            </h3>
+            <p className="text-white text-[14px]">
+              {showInvalidWalletPopup
+                ? "Please input a valid BEP20 wallet address."
+                : ""}
+            </p>
+            <button
+              onClick={() => {
+                setShowInvalidWalletPopup(false);
+                setWalletStatus(null);
+              }}
+              className="but w-[80%] bg-blue-500 px-4 py-2 rounded-lg mt-6"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="py-3"></div>
     </div>
   );
