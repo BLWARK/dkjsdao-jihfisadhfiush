@@ -66,7 +66,7 @@ const Nft = () => {
 
   return (
     <div className="relative">
-      <div className="farm-sec bgs w-full flex flex-col justify-start items-center h-screen overflow-y-scroll">
+      <div className="farm-sec bgs w-full px-3 flex flex-col justify-start items-center h-screen overflow-y-scroll">
         <div className="farm-wrap w-full px-4 flex flex-col justify-center items-center mt-5 relative">
           <div className="title flex flex-col w-full justify-start items-start mt-3">
             <p className="font-bold text-[24px]">Your NFTs</p>
