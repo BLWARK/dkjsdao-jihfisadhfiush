@@ -16,13 +16,13 @@ const Nft = () => {
   const hasFetched = useRef(false); // Ref untuk memastikan API hanya dipanggil sekali
   const [isLoading, setIsLoading] = useState(true); // State tambahan untuk loading
 
-  // Memanggil API getMeNFT dan menyimpan serta menghitung data
+  // Call API and counting data
   useEffect(() => {
     const fetchNFTData = async () => {
       if (hasFetched.current || !isLoading) return; // Cek apakah API sudah pernah dipanggil
 
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Delay 2 detik
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Delay
         const nftData = await getMeNFT(); // Panggil API getMeNFT
 
         console.log("NFT Data:", nftData); // Logging data NFT
@@ -65,12 +65,12 @@ const Nft = () => {
   }
 
   return (
-    <div className="relative">
-      <div className="farm-sec bgs w-full px-3 flex flex-col justify-start items-center h-screen overflow-y-scroll">
-        <div className="farm-wrap w-full px-4 flex flex-col justify-center items-center mt-5 relative">
-          <div className="title flex flex-col w-full justify-start items-start mt-3">
-            <p className="font-bold text-[24px]">Your NFTs</p>
-            <p className="font-regular text-gray-400 text-[14px]">
+    <div className="">
+      <div className="farm-sec bgs w-full  flex flex-col justify-start items-center h-screen overflow-y-scroll">
+        <div className="farm-wrap w-full  flex flex-col justify-center items-center mt-5 ">
+          <div className="title px-5 flex flex-col w-full justify-center items-center mt-3">
+            <p className="font-bold text-[32px]">Your NFTs</p>
+            <p className="font-regular text-center text-gray-400 text-[10px]">
               Buy your heroes for extra bonus rewards and rapid level growth.
             </p>
             
@@ -78,7 +78,7 @@ const Nft = () => {
 
           {/* NFTs Display */}
           <div className="farm-card w-full flex flex-col justify-center items-center mt-5">
-            <div className="scroll-container w-full flex overflow-x-auto gap-4 py-4 snap-x snap-mandatory">
+            <div className="scroll-container px-6 w-full flex overflow-x-auto gap-4 py-4 snap-x snap-mandatory">
               {nfts.length > 0 ? (
                 nfts.map((nft, index) => (
                   <div
@@ -119,7 +119,7 @@ const Nft = () => {
         </div>
 
         {/* NFT List */}
-        <div className="flex justify-start items-start w-full px-5 mt-3">
+        <div className="flex justify-start items-start w-full px-6 mt-3">
           <p className="text-left flex justify-start items-start text-[10px] font-bold text-white">
             Your NFTs list
           </p>
@@ -147,7 +147,7 @@ const Nft = () => {
         {/* Buy Button */}
         <div className="wrap-buy-button my-5">
           <Link href="https://xyznt.io/marketplace" target="_blank">
-            <button className="but px-[143px] py-4 rounded-xl">Buy NFT</button>
+            <button className="but px-[143px] py-4 rounded-xl font-bold">Buy NFT</button>
           </Link>
         </div>
 
