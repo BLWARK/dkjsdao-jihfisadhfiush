@@ -15,6 +15,8 @@ const Nft = () => {
   const locale = "en-US";
   const hasFetched = useRef(false); // Ref untuk memastikan API hanya dipanggil sekali
   const [isLoading, setIsLoading] = useState(true); // State tambahan untuk loading
+  const [currentSlide, setCurrentSlide] = useState(0); // State untuk melacak slide aktif
+  const sliderRef = useRef(null); // Reference to slider
 
   // Call API and counting data
   useEffect(() => {
@@ -27,20 +29,25 @@ const Nft = () => {
 
         console.log("NFT Data:", nftData); // Logging data NFT
 
-        if (nftData && nftData.length > 0 ) {
+        if (nftData && nftData.length > 0) {
           setNfts(nftData); // Simpan data NFT ke state
 
           // Menghitung jumlah Rare dan Super Rare NFT serta total reward
           const rareCount = nftData.filter((nft) => nft.rarity === "R").length;
-          const superRareCount = nftData.filter((nft) => nft.rarity === "SR").length;
-          const totalRewardCalc = nftData.reduce((acc, nft) => acc + (nft.reward || 0), 0);
+          const superRareCount = nftData.filter(
+            (nft) => nft.rarity === "SR"
+          ).length;
+          const totalRewardCalc = nftData.reduce(
+            (acc, nft) => acc + (nft.reward || 0),
+            0
+          );
 
           setCountR(rareCount);
           setCountSR(superRareCount);
           setTotalReward(totalRewardCalc); // Simpan total reward
           setIsLoading(false); // Set loading selesai
         }
-        setIsLoading(false); 
+        setIsLoading(false);
         hasFetched.current = true; // Tandai bahwa API sudah dipanggil
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -64,6 +71,24 @@ const Nft = () => {
     );
   }
 
+  const handleScroll = (e) => {
+    const scrollLeft = e.target.scrollLeft;
+    const width = e.target.clientWidth;
+    const newIndex = Math.round(scrollLeft / width);
+    setCurrentSlide(newIndex); // Update state slide aktif
+  };
+
+  const scrollToSlide = (index) => {
+    if (sliderRef.current) {
+      const width = sliderRef.current.clientWidth; // Mendapatkan lebar kontainer
+      sliderRef.current.scrollTo({
+        left: width * index,
+        behavior: "smooth", // Transisi scroll yang halus
+      });
+      setCurrentSlide(index); // Update slide aktif
+    }
+  };
+
   return (
     <div className="">
       <div className="farm-sec bgs w-full  flex flex-col justify-start items-center h-screen overflow-y-scroll">
@@ -73,53 +98,61 @@ const Nft = () => {
             <p className="font-regular text-center text-gray-400 text-[10px]">
               Buy your heroes for extra bonus rewards and rapid level growth.
             </p>
-            
           </div>
 
           {/* NFTs Display */}
           <div className="farm-card w-full flex flex-col justify-center items-center mt-5">
-            <div className="scroll-container px-6 w-full flex overflow-x-auto gap-4 py-4 snap-x snap-mandatory">
-              {nfts.length > 0 ? (
-                nfts.map((nft, index) => (
-                  <div
-                    key={index}
-                    className="scroll-item w-full h-80 bgs rounded-3xl flex flex-col justify-center items-center text-white text-2xl p-4"
-                  >
-                    <Image
-                      src={
-                        nft.image.startsWith("http")
-                          ? nft.image
-                          : `https://api.xyznt.io/${nft.image}`
-                      }
-                      alt={nft.name}
-                      width={200}
-                      height={200}
-                      className="rounded-3xl"
-                    />
-
-                    <p className="mt-6 text-center text-sm font-bold">
-                      {nft.name}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <div className="scroll-item w-full h-80 bgs rounded-3xl flex flex-col justify-center items-center text-white text-2xl p-4">
-                  <Link href="https://xyznt.io/marketplace" target="_blank">
-                    <div className="flex flex-col justify-center items-center w-full h-full cursor-pointer">
-                      <div className="text-6xl text-green-500">+</div>
-                      <p className="mt-6 text-center text-xs text-light text-gray-400">
-                        You don't have an NFT yet.
-                      </p>
-                    </div>
-                  </Link>
-                </div>
-              )}
-            </div>
+          <div
+  className="scroll-container px-6 w-full flex overflow-x-auto gap-4 py-4 snap-x snap-mandatory"
+  ref={sliderRef} // Tambahkan ref ke slider
+  onScroll={handleScroll} // Tetap jaga event onScroll untuk melacak slide aktif
+>
+  {nfts.length > 0 ? (
+    nfts.map((nft, index) => (
+      <div
+        key={index}
+        className="scroll-item w-full h-80 bgs rounded-3xl flex flex-col justify-center items-center text-white text-2xl p-4"
+      >
+        <Image
+          src={
+            nft.image.startsWith("http")
+              ? nft.image
+              : `https://api.xyznt.io/${nft.image}`
+          }
+          alt={nft.name}
+          width={200}
+          height={200}
+          className="rounded-3xl"
+        />
+        <p className="mt-6 text-center text-sm font-bold">{nft.name}</p>
+      </div>
+    ))
+  ) : (
+    <div className="scroll-item w-full h-80 bgs rounded-3xl flex flex-col justify-center items-center text-white text-2xl p-4">
+      <Link href="https://xyznt.io/marketplace" target="_blank">
+        <div className="flex flex-col justify-center items-center w-full h-full cursor-pointer">
+          <div className="text-6xl text-green-500">+</div>
+          <p className="mt-6 text-center text-xs text-light text-gray-400">You don't have an NFT yet.</p>
+        </div>
+      </Link>
+    </div>
+  )}
+</div>
           </div>
         </div>
-
+        <div className="dots flex justify-center items-center  space-x-2">
+          {nfts.map((_, index) => (
+            <div
+              key={index}
+              className={`dot w-3 h-3 rounded-full ${
+                index === currentSlide ? "bg-green-500" : "bg-gray-300"
+              }`}
+              onClick={() => scrollToSlide(index)} // Scroll to specific slide when dot is clicked
+            />
+          ))}
+        </div>
         {/* NFT List */}
-        <div className="flex justify-start items-start w-full px-6 mt-3">
+        <div className="flex justify-start items-start w-full px-6 mt-5">
           <p className="text-left flex justify-start items-start text-[10px] font-bold text-white">
             Your NFTs list
           </p>
@@ -147,7 +180,9 @@ const Nft = () => {
         {/* Buy Button */}
         <div className="wrap-buy-button my-5">
           <Link href="https://xyznt.io/marketplace" target="_blank">
-            <button className="but px-[143px] py-4 rounded-xl font-bold">Buy NFT</button>
+            <button className="but px-[143px] py-4 rounded-xl font-bold">
+              Buy NFT
+            </button>
           </Link>
         </div>
 

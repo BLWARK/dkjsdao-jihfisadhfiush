@@ -636,6 +636,27 @@ body {
       flex-direction: column;
       align-items: center;
     }
+    .dots {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 2px;
+      margin-bottom: 10px;
+    }
+    
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: gray;
+      margin: 0px;
+      cursor: pointer;
+    }
+    
+    .dot.bg-green-500 {
+      background-color: rgb(69, 100, 187);
+    }
+    
     
     
 /* styles.css */
