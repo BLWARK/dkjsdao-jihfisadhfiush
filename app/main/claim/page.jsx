@@ -104,11 +104,11 @@ const Claim = () => {
         
         // Tunggu 1 detik sebelum membuka tab baru
         setTimeout(() => {
-          window.open(selectedTask.link, "_blank");
+          window.open(selectedTask.link);
         }, 1000);
       } else if (selectedTask.link) {
         // Buka link untuk tugas non-Telegram
-        window.open(selectedTask.link, "_blank");
+        window.open(selectedTask.link);
         setTaskStarted(true);
         if (uploadedFile) {
           setCanClaim(true);

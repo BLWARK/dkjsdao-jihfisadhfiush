@@ -157,10 +157,10 @@ const Nft = () => {
             Your NFTs list
           </p>
         </div>
-        <div className="NFT-list w-[360px] h-[80px] flex flex-col justify-between items-center bgs mt-3 rounded-xl p-4 ">
+        <div className="NFT-list w-[360px] h-[80px] flex flex-col justify-between items-center bgs mt-3 rounded-xl p-4 gap-1">
           <div className="flex justify-between w-full">
-            <p className="font-regular text-[8px]">NFTs List</p>
-            <p className="font-regular text-[8px]">Total NFT Rewards</p>
+            <p className="font-regular text-[10px]">NFTs List</p>
+            <p className="font-regular text-[10px]">Total NFT Rewards</p>
           </div>
           <div className="flex justify-between w-full">
             <div className="nft-list-wrap flex flex-col justify-start items-start ">

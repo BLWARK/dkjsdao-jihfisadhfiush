@@ -230,7 +230,7 @@ const Earn = () => {
       setClickDelay(newDelay);
 
       setTimeout(() => setCoinAdded(false), 300);
-    } else {
+    } else { 
       setIsClickDisabled(true);
       setTimeout(() => setIsClickDisabled(false), 3000);
     }
