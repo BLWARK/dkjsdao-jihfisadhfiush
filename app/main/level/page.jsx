@@ -24,17 +24,19 @@ const Level = () => {
         await getMe(); // Fetch user data
         await play(); // Fetch game session data
         await getCheckpoint(); // Fetch checkpoint data from backend
-  
+
         const nftResult = await getMeNFT(); // Ambil data NFT
         setNftData(nftResult); // Simpan data NFT ke dalam state
-  
+
         // Hitung jumlah Rare dan Super Rare NFT
         const rareCount = nftResult.filter((nft) => nft.rarity === "R").length;
-        const superRareCount = nftResult.filter((nft) => nft.rarity === "SR").length;
-  
+        const superRareCount = nftResult.filter(
+          (nft) => nft.rarity === "SR"
+        ).length;
+
         setCountR(rareCount);
         setCountSR(superRareCount);
-  
+
         setLoading(false); // Set loading selesai
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -43,8 +45,6 @@ const Level = () => {
     };
     fetchData();
   }, []);
-  
-  
 
   const handleLevelInfoClick = () => {
     setShowLevelInfoPopup(true);
@@ -67,7 +67,6 @@ const Level = () => {
       </button>
     </Link>
   );
-  
 
   const NotEligibleButton = () => (
     <span className="bg-red-500 text-white px-2 py-1 rounded text-[8px]">
@@ -85,8 +84,8 @@ const Level = () => {
   const renderNftRequirementWithDetails = (level) => {
     const { minNftOwnership } = level;
     let nftRequirementText = "";
-    let linkUrl = "/marketplace"; // Default marketplace link
-  
+    let linkUrl = "https://xyznt.io"; // Default marketplace link
+
     // Menentukan syarat NFT untuk setiap level
     if (level.name === "Street Trader") {
       nftRequirementText = "1 Rare NFT (R)";
@@ -96,31 +95,35 @@ const Level = () => {
       linkUrl = "https://xyznt.io";
     } else if (level.name === "Enterprise Leader") {
       nftRequirementText = "1 Super Rare NFT (SR)";
-      linkUrl = "/marketplace/super-rare";
+      linkUrl = "https://xyznt.io";
     } else if (level.name === "Billionaire Visionary") {
       nftRequirementText = "2 Super Rare NFT (SR)";
-      linkUrl = "/marketplace/super-rare";
+      linkUrl = "https://xyznt.io";
     }
-  
-    const nftRequirementMet = (countR + countSR) >= minNftOwnership;
 
-    
-  
+    const nftRequirementMet = countR + countSR >= minNftOwnership;
+
     return (
       <li className="font-regular text-[12px] flex justify-between items-center w-full gap-4">
         <div>
           Have{" "}
-          <Link href={linkUrl} target="_blank" rel="noopener noreferrer" className="underline text-blue-500 italic">
+          <Link
+            href={linkUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline text-blue-500 italic"
+          >
             {nftRequirementText}
           </Link>
         </div>
-        {nftRequirementMet ? <CompleteButton /> : <GoButton link={linkUrl} target="_blank" />}
+        {nftRequirementMet ? (
+          <CompleteButton />
+        ) : (
+          <GoButton link={linkUrl} target="_blank" />
+        )}
       </li>
     );
   };
-  
-  
-  
 
   // Render Eligibility Status untuk level tertentu
   const renderEligibilityStatus = () => {
@@ -300,18 +303,18 @@ const Level = () => {
     const currentLevelIndex = dataLevel.findIndex(
       (levelData) => levelData.name === dataPlay?.levelName
     );
-  
+
     if (currentLevelIndex === -1) return null; // Jika level tidak ditemukan
-  
+
     // Ambil semua level dari current level hingga level terakhir
     const levelsToDisplay = dataLevel.slice(currentLevelIndex);
-  
+
     // Ambil semua level dari Street Trader ke atas untuk syarat NFT
     const streetTraderIndex = dataLevel.findIndex(
       (levelData) => levelData.name === "Street Trader"
     );
     const nftLevelsToCheck = dataLevel.slice(streetTraderIndex);
-  
+
     return (
       <>
         {levelsToDisplay.map((levelData, index) => (
@@ -320,7 +323,8 @@ const Level = () => {
             className="info1 w-full gap-2 flex flex-col justify-between items-start mt-4"
           >
             <p className="font-bold text-[16px] text-blue-300 gap-4">
-              {levelData.name} {index === 0 ? "(Current Level)" : "(Next Level)"}
+              {levelData.name}{" "}
+              {index === 0 ? "(Current Level)" : "(Next Level)"}
             </p>
             <ul className="info1-wrap list-disc list-inside flex flex-col justify-start items-start gap-2">
               {/* Tampilkan syarat referral jika ada */}
@@ -335,20 +339,21 @@ const Level = () => {
                   )}
                 </li>
               )}
-  
+
               {/* Tampilkan syarat NFT jika ada, dari level Street Trader ke atas */}
-              {nftLevelsToCheck.includes(levelData) && levelData.minNftOwnership && (
-                <li className="font-regular text-[12px] flex justify-between items-center w-full gap-8">
-                  {renderNftRequirementWithDetails(levelData)}
-                </li>
-              )}
+              {nftLevelsToCheck.includes(levelData) &&
+                levelData.minNftOwnership && (
+                  <li className="font-regular text-[12px] flex justify-between items-center w-full gap-8">
+                    {renderNftRequirementWithDetails(levelData)}
+                  </li>
+                )}
             </ul>
           </div>
         ))}
       </>
     );
   };
-  
+
   // Jika data sedang diambil, tampilkan animasi loading
   if (loading) {
     return (
@@ -402,25 +407,28 @@ const Level = () => {
       </div>
 
       {/* Switch Button Section */}
-<div className="switch-button px-4 gap-3 relative flex justify-start items-start w-full">
-  <button
-    className={`button-eligible rounded-lg bgs px-4 py-3 text-[12px] font-bold transition-transform duration-300 ${
-      activeTab === "eligible" ? "text-blue-300 scale-110" : "text-gray-500"
-    }`}
-    onClick={() => setActiveTab("eligible")}
-  >
-    Eligible Status
-  </button>
-  <button
-    className={`button-levelinfo rounded-lg bgs px-4 py-3 text-[12px] font-bold transition-transform duration-300 ${
-      activeTab === "levelInfo" ? "text-blue-300 scale-110" : "text-gray-500"
-    }`}
-    onClick={() => setActiveTab("levelInfo")}
-  >
-    Level Info
-  </button>
-</div>
-
+      <div className="switch-button px-4 gap-3 relative flex justify-start items-start w-full">
+        <button
+          className={`button-eligible rounded-lg bgs px-4 py-3 text-[12px] font-bold transition-transform duration-300 ${
+            activeTab === "eligible"
+              ? "text-blue-300 scale-110"
+              : "text-gray-500"
+          }`}
+          onClick={() => setActiveTab("eligible")}
+        >
+          Eligible Status
+        </button>
+        <button
+          className={`button-levelinfo rounded-lg bgs px-4 py-3 text-[12px] font-bold transition-transform duration-300 ${
+            activeTab === "levelInfo"
+              ? "text-blue-300 scale-110"
+              : "text-gray-500"
+          }`}
+          onClick={() => setActiveTab("levelInfo")}
+        >
+          Level Info
+        </button>
+      </div>
 
       {/* Konten untuk masing-masing tab */}
       {activeTab === "eligible" && (
@@ -461,7 +469,7 @@ const Level = () => {
             </p>
             <ul className="list-disc list-inside text-left mb-4 text-[12px]">
               <li>Reach the required number of referrals.</li>
-              
+
               <li>Own the required number and rarity of NFTs.</li>
             </ul>
             <h2 className="font-bold text-[16px] mt-10 mb-2 text-left text-blue-400">

@@ -152,11 +152,11 @@ const Nft = () => {
           ))}
         </div>
         {/* NFT List */}
-        <div className="flex justify-start items-start w-full px-6 mt-5">
+        {/* <div className="flex justify-start items-start w-full px-6 mt-5">
           <p className="text-left flex justify-start items-start text-[10px] font-bold text-white">
             Your NFTs list
           </p>
-        </div>
+        </div> */}
         <div className="NFT-list w-[360px] h-[80px] flex flex-col justify-between items-center bgs mt-3 rounded-xl p-4 gap-1">
           <div className="flex justify-between w-full">
             <p className="font-regular text-[10px]">NFTs List</p>
