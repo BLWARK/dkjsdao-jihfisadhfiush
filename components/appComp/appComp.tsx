@@ -192,7 +192,7 @@ useEffect(() => {
               <div>PLAY TO EARN XYZMER</div>
             </div> */}
 
-            <div className="wrap-logo coin w-full h-screen flex justify-center items-center mt-20">
+            <div className="wrap-logo coin w-full h-screen flex justify-center items-center ">
               <Image src="/BGSCR.png" alt="Logo" width={430} height={932} priority={true} />
             </div>
           </div>
