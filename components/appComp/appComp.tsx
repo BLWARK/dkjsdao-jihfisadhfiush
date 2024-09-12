@@ -180,7 +180,7 @@ useEffect(() => {
       {isMobileDevice && isTelegramWebApp ? (
         <>
           <div className="wrapper flex justify-center items-center flex-col">
-            <div className="neons font-bold text-[28px] flex justify-center items-center mt-6">
+            {/* <div className="neons font-bold text-[28px] flex justify-center items-center mt-6">
               <div>WELCOME TO</div>
               <div>WELCOME TO</div>
               <div>WELCOME TO</div>
@@ -190,17 +190,17 @@ useEffect(() => {
               <div>PLAY TO EARN XYZMER</div>
               <div>PLAY TO EARN XYZMER</div>
               <div>PLAY TO EARN XYZMER</div>
-            </div>
+            </div> */}
 
-            <div className="wrap-logo coin flex justify-center items-center mt-20">
-              <Image src="/XYZMER COIN.png" alt="Logo" width={200} height={200} priority={true} />
+            <div className="wrap-logo coin w-full h-screen flex justify-center items-center mt-20">
+              <Image src="/BGSCR.png" alt="Logo" width={430} height={932} priority={true} />
             </div>
           </div>
 
-          <div className="mt-[100px] flex gap-2 justify-center items-center">
+          {/* <div className="mt-[100px] flex gap-2 justify-center items-center">
             <Image src="/XYZMER LOGOs.png" alt="Logo" width={50} height={50} priority={true} />
             <p className="font-bold">XYZMERCOIN</p>
-          </div>
+          </div> */}
 
           {/* Overlay animasi loading dengan latar belakang hitam */}
           {isLoading && (

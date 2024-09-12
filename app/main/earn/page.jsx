@@ -402,7 +402,7 @@ const Earn = () => {
               className={`gap-2 but p-4 flex justify-center items-center rounded-xl ${
                 walletAddress ? "Disable" : ""
               }`}
-              // onClick={handleConnectWalletClick}
+              onClick={handleConnectWalletClick}
               disabled={!!walletAddress}
             >
               <IoWallet />
