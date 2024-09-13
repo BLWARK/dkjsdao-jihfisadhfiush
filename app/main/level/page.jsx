@@ -61,13 +61,13 @@ const Level = () => {
   );
 
   const GoButton = ({ link }) => (
-    <Link href={link} target="_blank" rel="noopener noreferrer">
-      <button className="bg-blue-500 text-white px-4 py-1 rounded text-[8px]">
+    <Link href={link} passHref>
+      <a target="_blank" rel="noopener noreferrer" className="bg-blue-500 text-white px-4 py-1 rounded text-[8px]">
         Go
-      </button>
+      </a>
     </Link>
   );
-
+  
   const NotEligibleButton = () => (
     <span className="bg-red-500 text-white px-2 py-1 rounded text-[8px]">
       Not Eligible
@@ -188,7 +188,7 @@ const Level = () => {
               nextLevelData.minReferral ? (
                 <CompleteButton />
               ) : (
-                <GoButton href="/main/invite" />
+                <GoButton link="/main/invite" />
               )}
             </li>
           )}
@@ -198,7 +198,7 @@ const Level = () => {
               {(dataMe?.points || 0) >= nextLevelData.minimumPoint ? (
                 <CompleteButton />
               ) : (
-                <GoButton href="/main/earn" />
+                <GoButton link="/main/earn" />
               )}
             </li>
           )}
@@ -235,7 +235,7 @@ const Level = () => {
               {checkpoint?.checkpoint >= currentLevelData.totalCheckPoin ? (
                 <CompleteButton />
               ) : (
-                <GoButton href="/main/claim" />
+                <GoButton link="/main/claim" />
               )}
             </li>
           )}
@@ -246,7 +246,7 @@ const Level = () => {
               currentLevelData.minReferral ? (
                 <CompleteButton />
               ) : (
-                <GoButton href="/main/invite" />
+                <GoButton link="/main/invite" />
               )}
             </li>
           )}
@@ -256,7 +256,7 @@ const Level = () => {
               {(dataMe?.points || 0) >= currentLevelData.minimumPoint ? (
                 <CompleteButton />
               ) : (
-                <GoButton href="/main/earn" />
+                <GoButton link="/main/earn" />
               )}
             </li>
           )}
