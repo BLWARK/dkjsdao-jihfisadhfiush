@@ -188,7 +188,7 @@ const Level = () => {
               nextLevelData.minReferral ? (
                 <CompleteButton />
               ) : (
-                <GoButton link="/main/invite" />
+                <GoButton href="/main/invite" />
               )}
             </li>
           )}
@@ -198,7 +198,7 @@ const Level = () => {
               {(dataMe?.points || 0) >= nextLevelData.minimumPoint ? (
                 <CompleteButton />
               ) : (
-                <GoButton link="/main/earn" />
+                <GoButton href="/main/earn" />
               )}
             </li>
           )}
@@ -235,7 +235,7 @@ const Level = () => {
               {checkpoint?.checkpoint >= currentLevelData.totalCheckPoin ? (
                 <CompleteButton />
               ) : (
-                <GoButton link="/main/claim" />
+                <GoButton href="/main/claim" />
               )}
             </li>
           )}
@@ -246,7 +246,7 @@ const Level = () => {
               currentLevelData.minReferral ? (
                 <CompleteButton />
               ) : (
-                <GoButton link="/main/invite" />
+                <GoButton href="/main/invite" />
               )}
             </li>
           )}
@@ -256,7 +256,7 @@ const Level = () => {
               {(dataMe?.points || 0) >= currentLevelData.minimumPoint ? (
                 <CompleteButton />
               ) : (
-                <GoButton link="/main/earn" />
+                <GoButton href="/main/earn" />
               )}
             </li>
           )}
