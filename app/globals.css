@@ -578,10 +578,12 @@ body {
     .scroll-container {
       scroll-behavior: smooth;
       display: flex;
+      align-items: center;
       overflow-x: auto;
       gap: 1rem;
-      padding: 1rem 0;
+      padding: 1rem 10px;
       scroll-snap-type: x mandatory;
+      width: 350px;
     }
     
     .scroll-item {
@@ -596,6 +598,8 @@ body {
       color: white;
       font-size: 2rem;
       scroll-snap-align: center;
+      
+      
     }
     
     .scroll-container::-webkit-scrollbar {

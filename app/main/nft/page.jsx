@@ -111,7 +111,7 @@ const Nft = () => {
     nfts.map((nft, index) => (
       <div
         key={index}
-        className="scroll-item w-full h-80 bgs rounded-3xl flex flex-col justify-center items-center text-white text-2xl p-4"
+        className="scroll-item w-full h-80 bgs rounded-3xl flex flex-col justify-center items-center text-white text-2xl p-4 "
       >
         <Image
           src={
