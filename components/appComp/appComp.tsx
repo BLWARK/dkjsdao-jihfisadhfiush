@@ -204,7 +204,7 @@ useEffect(() => {
 
           {/* Overlay animasi loading dengan latar belakang hitam */}
           {isLoading && (
-            <div className="overlay fixed inset-0 flex justify-center items-center bg-blue-950 bg-opacity-40 z-50">
+            <div className="overlay fixed inset-0 flex justify-center items-center bg-blue-950 bg-opacity-0 z-50">
               <Player autoplay loop src="https://lottie.host/16594a2c-c2ad-4196-98e2-51ab691a2e8d/ycygvL2itD.json" style={{ height: "100px", width: "100px" }} />
             </div>
           )}
