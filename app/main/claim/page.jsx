@@ -97,25 +97,32 @@ const Claim = () => {
     if (selectedTask) {
       // Identifikasi apakah tugas terkait dengan Telegram
       const isTelegramTask = selectedTask.name.toLowerCase().includes("telegram") || selectedTask.link.includes("t.me");
-
+  
       if (isTelegramTask) {
-        // Tandai tugas Telegram sebagai selesai
-        await handleSend(); // Langsung selesaikan tugas tanpa tombol send
+        // Buka link Telegram terlebih dahulu
+        window.open(selectedTask.link);
         
-        // Tunggu 1 detik sebelum membuka tab baru
-        setTimeout(() => {
-          window.open(selectedTask.link);
-        }, 1000);
+        // Tunggu 5 detik sebelum menandai tugas Telegram sebagai selesai
+        setTimeout(async () => {
+          await handleSend(); // Tandai tugas sebagai selesai setelah 5 detik
+        }, 5000); // 5000 ms = 5 detik
       } else if (selectedTask.link) {
         // Buka link untuk tugas non-Telegram
         window.open(selectedTask.link);
+        
+        // Tandai tugas sebagai dimulai setelah link terbuka
         setTaskStarted(true);
+        
+        // Cek apakah file telah diupload, jika ya, izinkan klaim
         if (uploadedFile) {
-          setCanClaim(true);
+          setTimeout(() => {
+            setCanClaim(true);
+          }, 3000); // Beri jeda waktu 5 detik sebelum klaim bisa dilakukan
         }
       }
     }
   };
+  
 
   const handleSend = async () => {
     try {

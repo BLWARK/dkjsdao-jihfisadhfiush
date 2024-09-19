@@ -79,7 +79,7 @@ const Earn = () => {
         if (userData) {
           setBalanceAirdrop(userData.points);
         }
-
+        
         if (playData) {
           setClaimableCoins(playData.unclaimedPoints);
           setTimer(3600 - playData.elapsedTimeInSeconds);
