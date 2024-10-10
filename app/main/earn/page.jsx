@@ -342,14 +342,14 @@ const Earn = () => {
               <MdClose size={24} />
             </button>
             <Image
-              src="/NewFeature.jpg"
-              alt="New Feature"
+              src="/New comer.jpg"
+              alt="New comer"
               width={400}
               height={400}
               className="rounded-md"
             />
             <Link
-              href="/main/claim"
+              href="https://t.me/DYNASTY_COIN_INDONESIA/90947"
               className="text-center text-white font-bold px-4 w-full py-5  but rounded-xl mb-3 "
             >
               Check out our New Feature!
@@ -402,7 +402,7 @@ const Earn = () => {
               className={`gap-2 but p-4 flex justify-center items-center rounded-xl ${
                 walletAddress ? "Disable" : ""
               }`}
-              onClick={handleConnectWalletClick}
+              // onClick={handleConnectWalletClick}
               disabled={!!walletAddress}
             >
               <IoWallet />
