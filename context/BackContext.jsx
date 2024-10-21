@@ -18,8 +18,7 @@ export const BackProvider = ({ children }) => {
   const [userTask, setUserTask] = useState ();
   const [checkpoint, setCheckpoint] = useState();  // State untuk menyimpan data checkpoint user
   const [walletData, setWalletData] = useState();
-
-  
+  const [campaigns, setCampaigns] = useState();  // State untuk menyimpan data campaigns
 
   const login = async ( userData ) => {
     const data = {
@@ -140,7 +139,6 @@ export const BackProvider = ({ children }) => {
       console.error("Error fetching task list:", error);
     }
   };
-  
 
   const useTask = async (taskId) => {
     try {
@@ -162,10 +160,28 @@ export const BackProvider = ({ children }) => {
       console.error("Error in useTask:", error);
     }
   };
+
+  // Tambahkan fungsi untuk mengambil data campaign berdasarkan tanggal
+  const getCampaignsByDate = async (startDate, endDate) => {
+    try {
+      // Format tanggal yang diterima ke dalam format YYYY-MM-DD jika diperlukan
+      const formattedStartDate = new Date(startDate).toISOString().split('T')[0];  // Format untuk API
+      const formattedEndDate = new Date(endDate).toISOString().split('T')[0];
+  
+      // Memanggil API dengan query parameter start dan end yang telah diformat
+      const res = await customGet(`/api/v1/campaigns?start=${formattedStartDate}&end=${formattedEndDate}`);
+      
+      // Simpan data campaign di state jika respons API berisi data
+      setCampaigns(res?.data?.campaigns);
+      
+      return res?.data?.campaigns;
+    } catch (error) {
+      console.error("Error fetching campaigns by date:", error);
+    }
+  };
   
   
 
-  // Tambahkan fungsi getCheckpoint untuk mengambil data checkpoint user
   const getCheckpoint = async () => {
     try {
       const res = await customGet('api/v1/checkpoint');
@@ -217,7 +233,6 @@ export const BackProvider = ({ children }) => {
       console.error("Error connecting wallet:", error);
     }
   };
-  
 
   const getMeNFT = async () => {
     try {
@@ -235,11 +250,6 @@ export const BackProvider = ({ children }) => {
     }
   };
   
-  
-
-
-  
-
   return (
     <BackContext.Provider
       value={{
@@ -253,20 +263,22 @@ export const BackProvider = ({ children }) => {
         totalUsers,
         taskList,
         useTask,
-        getCheckpoint,  // Ekspos fungsi getCheckpoint
-        postCheckpoint, // Ekspos fungsi postCheckpoint
-        connectWallet,  // Ekspos fungsi connectWallet
-        getMeNFT,  // Ekspos fungsi getMeNFT
-        walletData,  // Ekspos state walletData
+        getCheckpoint,
+        postCheckpoint,
+        connectWallet,
+        getMeNFT,
+        getCampaignsByDate,  // Ekspos fungsi getCampaignsByDate
+        walletData,
         task,
         userTask,
-        checkpoint,  // Ekspos state checkpoint
+        checkpoint,
         rank,
         dataMe,
         dataPlay,
         clickCoin,
         claim,
         total,
+        campaigns,  // Ekspos state campaigns
       }}
     >
       {children}

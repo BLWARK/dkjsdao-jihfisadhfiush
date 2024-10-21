@@ -6,31 +6,39 @@ import { useBackend } from "@/context/BackContext";
 import { Player } from "@lottiefiles/react-lottie-player"; // Import Lottie Player
 
 const Rank = () => {
-  const { rank, leaderboard, dataMe, getMe } = useBackend();
+  const { rank, leaderboard, getMe, getCampaignsByDate, campaigns } = useBackend();
 
   const [activeTab, setActiveTab] = useState("leaderboard"); // State to control active tab
 
+  // Fetch leaderboard on component mount
   useEffect(() => {
-    leaderboard(); // Fetch leaderboard when component mounts
-    getMe(); // Fetch user data when component mounts
+    leaderboard(); // Fetch regular leaderboard
+    getMe(); // Fetch user data
   }, []);
 
+  // Function to fetch moonshot leaderboard (campaigns) when tab is active
+  const fetchMoonshotLeaderboard = async () => {
+    const startDate = "2024-10-19";
+    const endDate = "2024-10-20"; // Atur tanggal sesuai keinginan
+    await getCampaignsByDate(startDate, endDate); // Memanggil API campaign dan menyimpan di state campaigns
+  };
+
+  // Handle tab switch
   const handleTabClick = (tabName) => {
     setActiveTab(tabName);
+    if (tabName === "moonshot") {
+      fetchMoonshotLeaderboard(); // Fetch Moonshot leaderboard ketika tab dipilih
+    }
   };
 
   return (
     <div className="rank-sec bgs w-full flex flex-col justify-start items-center overflow-y-scroll">
       {/* Tab Navigation */}
-
-      {/* Leaderboard Content */}
       <div className="rank-invite w-full px-4 flex flex-col justify-center items-center mt-5">
         <div className="title flex gap-2 justify-center items-center py-5">
           <Image src="/Crown.png" alt="gift" width={30} height={30} />
           <p className="font-bold text-[24px]">
-            {activeTab === "leaderboard"
-              ? "Leaderboards"
-              : "Moonshot Leaderboard"}
+            {activeTab === "leaderboard" ? "Leaderboards" : "Moonshot Leaderboard"}
           </p>
         </div>
 
@@ -44,6 +52,7 @@ const Rank = () => {
             (Rankings are calculated based on points and referrals)
           </p>
         </div>
+
         <div className="tabs w-full flex justify-start items-center gap-4 mt-4">
           <div
             onClick={() => handleTabClick("leaderboard")}
@@ -69,14 +78,15 @@ const Rank = () => {
 
         {/* Display different content based on the active tab */}
         <div className="all-friends overflow-y-scroll h-[540px] flex flex-col mb-24 gap-2 mt-2 transition-all duration-500 ease-in-out">
-          {rank?.leaderboard?.length > 0 ? (
+          {/* If active tab is leaderboard, show rank data */}
+          {activeTab === "leaderboard" && rank?.leaderboard?.length > 0 ? (
             rank.leaderboard.map((user, index) => (
               <div
                 key={user._id}
                 className="list1 w-[360px] h-[120px] flex justify-between items-center bgs rounded-xl p-6"
               >
                 <div className="wrap-user-rank flex justify-start items-center gap-3">
-                  {/* Conditionally render Lottie for rank 1-3 */}
+                  {/* Render Lottie for ranks 1-3 */}
                   {index === 0 && (
                     <Player
                       autoplay
@@ -114,8 +124,36 @@ const Rank = () => {
                 <div className="total-points flex justify-center items-center gap-1">
                   <Image src="/Coins.png" alt="coins" width={15} height={15} />
                   <p className="text-white text-[11px]">
-                    {" "}
                     {user.points.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : activeTab === "moonshot" && campaigns?.length > 0 ? (
+            campaigns.slice(0, 40).map((campaign, index) => (
+              <div
+                key={campaign.user._id}
+                className="list1 w-[360px] h-[120px] flex justify-between items-center bgs rounded-xl p-6"
+              >
+                <div className="wrap-user-rank flex justify-start items-center gap-3">
+                  <div className="username-wrap flex flex-col justify-start items-center ">
+                    <p className="text-white text-[15px]">{index + 1}</p>
+                  </div>
+                  <div className="username-wrap flex flex-col justify-start items-start gap-1">
+                    <p className="text-white text-[12px]">
+                    {campaign.user.firstName || "Unknown User"}
+                    </p>
+                  </div>
+                </div>
+                <div className="total-points flex flex-col justify-start items-start">
+                  <p className="text-white text-[11px]">
+                    Total Points: {campaign.totalPoints.toFixed(2)}
+                  </p>
+                  <p className="text-white text-[11px]">
+                    Count: {campaign.count}
+                  </p>
+                  <p className="text-white text-[11px]">
+                    Campaign Score: {campaign.totalCampaignScore.toFixed(2)}
                   </p>
                 </div>
               </div>
